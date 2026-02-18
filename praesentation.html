@@ -346,7 +346,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <div class="day-stats">
       <span>~5,5h Gesamtreise</span>
       <span>FlixTrain FLX10</span>
-      <span>~27 EUR p.P.</span>
+      <span>~27 EUR gesamt</span>
     </div>
   </div>
   <div class="day-cards">
@@ -536,7 +536,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   <div class="detail-legend">
     <h3 style="color:var(--green);font-size:0.72rem;margin-bottom:8px">LEGENDE</h3>
     <div class="dl-row"><div class="dl-line" style="background:var(--green)"></div> Wanderweg</div>
-    <div class="dl-row"><div class="dl-line" style="background:var(--blue);border:1px dashed var(--blue);background:transparent"></div> Zug / Bus</div>
+    <div class="dl-row"><div class="dl-line" style="border:1px dashed var(--blue);background:transparent"></div> Zug / Bus</div>
     <div class="dl-row"><div class="dl-line" style="background:var(--teal)"></div> Kanu-Route</div>
     <div style="height:6px"></div>
     <div class="dl-row"><div class="dl-icon" style="background:var(--gold);border-radius:4px">S</div> Start / Ziel</div>
@@ -1603,7 +1603,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 
 <div class="nav">
   <button onclick="go(-1)">&#8592;</button>
-  <span class="counter" id="counter">1 / 26</span>
+  <span class="counter" id="counter"></span>
   <button onclick="go(1)">&#8594;</button>
 </div>
 
@@ -1625,14 +1625,18 @@ function show(n){
 }
 function go(d){const n=cur+d;if(n>=0&&n<total)show(n)}
 document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1)}
+  const isMap=slides[cur].classList.contains('map-slide');
+  if(e.key==='ArrowRight'||(e.key===' '&&!isMap)){e.preventDefault();go(1)}
   if(e.key==='ArrowLeft')go(-1);
   if(e.key==='Home')show(0);
   if(e.key==='End')show(total-1);
 });
 let tx=0;
 document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
-document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?go(1):go(-1)}});
+document.addEventListener('touchend',e=>{
+  if(slides[cur].classList.contains('map-slide'))return;
+  const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?go(1):go(-1)}
+});
 
 // Tour map
 function initTourMap(){
@@ -1725,7 +1729,7 @@ function initDetailMap(){
 
   // === STÄDTE / HAUPT-STOPS ===
   const cities=[
-    {name:'Potsdam',lat:52.391,lng:13.065,tag:'START',desc:'Beim Kumpel, 12.-19. April',cls:'mi-start',txt:'P'},
+    {name:'Potsdam',lat:52.391,lng:13.065,tag:'START',desc:'Beim Kumpel, 10.-19. April',cls:'mi-start',txt:'P'},
     {name:'Lübbenau',lat:51.866,lng:13.767,tag:'TAG 1-2',desc:'Spreewald: Kanu + Camping',cls:'mi-city',txt:'L'},
     {name:'Naumburg',lat:51.156,lng:11.809,tag:'TAG 3',desc:'Saale-Unstrut Weinberge',cls:'mi-city',txt:'N'},
     {name:'Thale',lat:51.750,lng:11.033,tag:'TAG 4',desc:'Bodetal: 280m Schlucht!',cls:'mi-city',txt:'T'},
