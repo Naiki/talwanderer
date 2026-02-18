@@ -344,12 +344,12 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   .day-hero .day-sub{font-size:0.85rem;margin-top:4px}
   .day-hero .day-stats{flex-wrap:wrap;gap:6px;margin-top:8px}
   .day-hero .day-stats span{font-size:0.68rem;padding:3px 8px}
-  .day-cards{grid-template-columns:1fr;padding:0 12px 80px;gap:10px}
+  .day-cards{grid-template-columns:1fr;padding:0 12px 110px;gap:10px}
   .day-cards .card{padding:14px}
 
   /* CONTENT SLIDES */
-  .content-slide,.content-hero{padding:16px 12px 80px}
-  .slide-inner{padding:16px 12px 80px}
+  .content-slide,.content-hero{padding:16px 12px 110px}
+  .slide-inner{padding:16px 12px 110px}
 
   /* GRIDS: alles 1-spaltig */
   .g2,.g3,.g4,.g5,.g6{grid-template-columns:1fr}
@@ -358,7 +358,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   /* CARDS */
   .card{padding:14px;border-radius:12px}
   .card li{font-size:0.8rem;padding:3px 0}
-  .card-img{height:140px;border-radius:8px}
+  .card-img{height:100px;border-radius:8px}
 
   /* CHAIN: vertikal auf mobile */
   .chain{flex-direction:column;align-items:stretch;gap:0;margin:12px 0}
@@ -374,7 +374,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   .timeline .tl-items{padding:0}
 
   /* TABELLE */
-  .tbl .row{grid-template-columns:28px 90px 1fr;font-size:0.68rem;padding:5px 8px}
+  .tbl .row{grid-template-columns:24px 70px 1fr;font-size:0.7rem;padding:4px 6px}
 
   /* MAP SLIDES */
   .map-slide{overflow:hidden!important;-webkit-overflow-scrolling:auto}
@@ -393,9 +393,9 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   .stat-pill .sp-num{font-size:0.82rem}
 
   /* NAV */
-  .nav{padding:8px 18px;gap:8px}
-  .nav button{width:34px;height:34px;font-size:14px}
-  .nav .counter{font-size:11px;min-width:44px}
+  .nav{padding:8px 16px;gap:10px}
+  .nav button{width:44px;height:44px;font-size:16px}
+  .nav .counter{font-size:12px;min-width:48px}
 
   /* NIKKI ELEMENTS */
   .nikki-frame{width:80px;height:80px;border-width:2px}
@@ -434,19 +434,34 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   .weight-row{font-size:0.75rem}
 
   /* END SLIDE */
-  .end-content{padding:24px 16px}
+  .end-content{padding:24px 16px 110px}
   .end-content h1{font-size:1.8rem}
   .end-content p{font-size:0.95rem}
 
   /* FIX: checks 2-col grid auf mobile 1-spaltig */
   .check + .check{margin-top:0}
-  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
 
   /* DIVIDER */
   .divider{margin:8px 0 12px}
 
   /* HIGHLIGHT */
   .highlight{font-size:0.62rem;padding:2px 8px}
+
+  /* Nikki Gallery: 110px Bilder auf 80px reduzieren */
+  .nikki-gallery .nikki-thumb{width:80px!important;height:80px!important}
+
+  /* Große Inline-Fonts skalieren */
+  div[style*="font-size:3rem"]{font-size:1.8rem!important}
+  div[style*="font-size:2rem"]{font-size:1.3rem!important}
+
+  /* Flex-Container mit Stat-Pills: flex-wrap erzwingen */
+  div[style*="display:flex"][style*="gap:12px"]{flex-wrap:wrap!important}
+  div[style*="display:flex"][style*="gap:16px"]{flex-wrap:wrap!important}
+  div[style*="display:flex"][style*="gap:24px"]{flex-wrap:wrap!important}
+
+  /* Weight-Bars schmaler */
+  .weight-row .wr-bar{width:60px}
 }
 </style>
 </head>
@@ -1822,12 +1837,13 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Home')show(0);
   if(e.key==='End')show(total-1);
 });
-let tx=0;
-document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
 document.addEventListener('touchend',e=>{
   if(slides[cur].classList.contains('map-slide'))return;
-  const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?go(1):go(-1)}
-});
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>80&&Math.abs(dy)<Math.abs(dx)*0.6){dx<0?go(1):go(-1)}
+},{passive:true});
 
 // Tour map
 function initTourMap(){
