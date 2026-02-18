@@ -287,15 +287,163 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   border:1px solid var(--glassBorder);font-size:0.78rem;color:var(--soft)}
 .stat-pill .sp-num{font-weight:800;font-size:1rem}
 
+/* SLIDE-INNER: für Slides mit custom inline layouts */
+.slide-inner{flex:1;display:flex;flex-direction:column;justify-content:center;padding:30px 40px 80px;position:relative;z-index:1}
+.team-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:1100px}
+.nikki-training-bottom{margin-top:14px;display:flex;gap:16px;align-items:stretch}
+.nikki-training-photo{flex-shrink:0;width:160px}
+.nikki-training-alerts{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* TABLET: 601-900px */
 @media(max-width:900px){
   .title-content h1{font-size:3.5rem;letter-spacing:2px}
-  .title-content .meta{flex-wrap:wrap;gap:12px}
+  .title-content .meta{flex-wrap:wrap;gap:10px}
+  .title-content{padding:40px 30px}
   .day-hero .day-title{font-size:2rem}
+  .day-hero{padding:30px 24px 20px}
   .g3,.g4,.g5,.g6{grid-template-columns:1fr 1fr}
   .day-cards{grid-template-columns:1fr;padding:0 24px 90px}
-  .content-slide{padding:24px 24px 90px}
-  .chain{gap:4px}.chain .stop{min-width:80px}
+  .content-slide,.content-hero{padding:24px 24px 90px}
+  .slide-inner{padding:24px 24px 90px}
+  .chain .stop{min-width:80px}
   h1{font-size:2.5rem}h2{font-size:1.6rem}
+  .day-badge{left:24px;top:24px}
+  .map-overlay{left:16px;top:16px;max-width:260px}
+  .map-legend{bottom:90px;right:16px}
+  .detail-legend{bottom:90px;right:12px}
+  .end-content{padding:40px 24px}
+  .end-content h1{font-size:2.5rem}
+  .timeline .tl-step{flex:1 1 45%;min-width:140px}
+  .timeline{flex-wrap:wrap}
+  .tbl .row{grid-template-columns:40px 120px 1fr;font-size:0.75rem}
+  .team-grid{grid-template-columns:1fr 1fr}
+}
+
+/* PHONE: <= 600px */
+@media(max-width:600px){
+  html{font-size:15px}
+  h1{font-size:1.8rem}h2{font-size:1.3rem}h3{font-size:0.72rem}
+  .label{font-size:0.62rem;letter-spacing:1.5px}
+  .subtitle{font-size:0.85rem}
+
+  /* TITLE SLIDE */
+  .title-content{padding:24px 16px}
+  .title-content h1{font-size:2rem;letter-spacing:1px}
+  .title-content .tagline{font-size:1rem;margin-bottom:16px}
+  .title-content .meta{flex-wrap:wrap;gap:8px;margin-top:16px}
+  .title-content .meta .item{padding:8px 14px}
+  .title-content .meta .num{font-size:1.2rem}
+  .title-content .meta .txt{font-size:0.65rem}
+
+  /* DAY SLIDES */
+  .day-badge{left:12px;top:12px;padding:6px 10px}
+  .day-badge .num{font-size:1.4rem}
+  .day-badge .date{font-size:0.6rem}
+  .day-hero{padding:20px 16px 14px}
+  .day-hero .day-title{font-size:1.5rem}
+  .day-hero .day-sub{font-size:0.85rem;margin-top:4px}
+  .day-hero .day-stats{flex-wrap:wrap;gap:6px;margin-top:8px}
+  .day-hero .day-stats span{font-size:0.68rem;padding:3px 8px}
+  .day-cards{grid-template-columns:1fr;padding:0 12px 80px;gap:10px}
+  .day-cards .card{padding:14px}
+
+  /* CONTENT SLIDES */
+  .content-slide,.content-hero{padding:16px 12px 80px}
+  .slide-inner{padding:16px 12px 80px}
+
+  /* GRIDS: alles 1-spaltig */
+  .g2,.g3,.g4,.g5,.g6{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:1fr}
+
+  /* CARDS */
+  .card{padding:14px;border-radius:12px}
+  .card li{font-size:0.8rem;padding:3px 0}
+  .card-img{height:140px;border-radius:8px}
+
+  /* CHAIN: vertikal auf mobile */
+  .chain{flex-direction:column;align-items:stretch;gap:0;margin:12px 0}
+  .chain .stop{max-width:100%;min-width:0;border-radius:10px;padding:10px}
+  .chain .arr{transform:rotate(90deg);padding:2px 0;justify-content:center;font-size:1rem}
+
+  /* TIMELINE: vertikal auf mobile */
+  .timeline{flex-direction:column;gap:12px;margin:12px 0}
+  .timeline::before{display:none}
+  .timeline .tl-step{flex:none;padding-top:0;text-align:left;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+  .timeline .tl-dot{position:static;transform:none;margin-top:2px}
+  .timeline .tl-label{margin-bottom:2px}
+  .timeline .tl-items{padding:0}
+
+  /* TABELLE */
+  .tbl .row{grid-template-columns:28px 90px 1fr;font-size:0.68rem;padding:5px 8px}
+
+  /* MAP SLIDES */
+  .map-overlay{left:8px;top:8px;max-width:180px}
+  .map-overlay .card{padding:10px 12px}
+  .map-overlay h2{font-size:1rem!important}
+  .map-legend{bottom:76px;right:8px;padding:8px 12px}
+  .map-legend .leg-item{font-size:0.72rem}
+  .detail-legend{bottom:76px;right:8px;padding:8px 12px;max-width:180px}
+  .detail-legend .dl-row{font-size:0.68rem}
+
+  /* STAT PILLS */
+  .stat-pill{padding:4px 10px;font-size:0.7rem}
+  .stat-pill .sp-num{font-size:0.82rem}
+
+  /* NAV */
+  .nav{padding:8px 18px;gap:8px}
+  .nav button{width:34px;height:34px;font-size:14px}
+  .nav .counter{font-size:11px;min-width:44px}
+
+  /* NIKKI ELEMENTS */
+  .nikki-frame{width:80px;height:80px;border-width:2px}
+  .nikki-frame.lg{width:110px;height:110px;border-width:3px}
+  .nikki-badge{padding:6px 10px;gap:6px}
+  .nikki-badge img{width:28px;height:28px}
+  .nikki-badge .nb-text{font-size:0.7rem}
+
+  /* NIKKI TRAINING BOTTOM */
+  .nikki-training-bottom{flex-direction:column;gap:12px}
+  .nikki-training-photo{width:100%;display:flex;justify-content:center}
+  .nikki-training-photo img{width:200px!important;height:120px!important}
+  .nikki-training-alerts{grid-template-columns:1fr}
+
+  /* RECIPES */
+  .recipe{padding:10px}
+  .recipe h3{font-size:0.72rem}
+  .recipe .meta{font-size:0.65rem}
+  .recipe ol{font-size:0.72rem;line-height:1.5}
+
+  /* WEEKS */
+  .week{padding:10px}
+  .week li{font-size:0.72rem}
+
+  /* CHECKS */
+  .check{font-size:0.78rem;gap:6px}
+  .check .icon{width:18px;height:18px;font-size:9px}
+
+  /* ALERTS */
+  .alert{padding:10px 12px;border-radius:10px}
+
+  /* BUDGET BARS */
+  .budget-bar .bar-label{font-size:0.7rem}
+
+  /* WEIGHT ROWS */
+  .weight-row{font-size:0.75rem}
+
+  /* END SLIDE */
+  .end-content{padding:24px 16px}
+  .end-content h1{font-size:1.8rem}
+  .end-content p{font-size:0.95rem}
+
+  /* FIX: checks 2-col grid auf mobile 1-spaltig */
+  .check + .check{margin-top:0}
+  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+
+  /* DIVIDER */
+  .divider{margin:8px 0 12px}
+
+  /* HIGHLIGHT */
+  .highlight{font-size:0.62rem;padding:2px 8px}
 }
 </style>
 </head>
@@ -446,10 +594,10 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 <!-- FOLIE 2: TEAM -->
 <div class="slide" data-n="2">
   <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1612774412771-005ed8e861d2?auto=format&fit=crop&w=1920&q=80')"></div>
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:30px 40px 80px;position:relative;z-index:1">
+  <div class="slide-inner">
     <div class="label" style="margin-bottom:8px">DAS TEAM</div>
     <h2 style="font-size:2.2rem;margin-bottom:14px">Sven & Nikki</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:1100px">
+    <div class="team-grid">
       <div class="card">
         <h3 style="color:var(--green)">SVEN &mdash; DER WANDERER</h3>
         <ul>
@@ -1232,7 +1380,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 <!-- FOLIE 16: BIER & WEIN GUIDE -->
 <div class="slide" data-n="16">
   <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=1920&q=80')"></div>
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:40px 50px 90px;position:relative;z-index:1">
+  <div class="slide-inner" style="justify-content:flex-end">
     <div class="label" style="margin-bottom:8px">PROST!</div>
     <h2 style="font-size:2rem;margin-bottom:16px">Bier & Wein entlang der Route</h2>
     <div class="grid g3" style="max-width:1100px">
@@ -1296,13 +1444,12 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
       <li>9-10 km Wanderung</li><li>Verschiedene Gelände</li><li>Zug + Wanderung kombiniert</li>
       <li>Probe-Packen (&lt;12kg!)</li><li>Tierarzt-Check + Frontpro</li></ul></div>
   </div>
-  <div style="margin-top:14px;display:flex;gap:16px;align-items:stretch">
-    <!-- NIKKI FEATURED PHOTO: Ersetze mit echtem Nikki-Foto (mit Weste) -->
-    <div class="nikki-polaroid p-left" style="flex-shrink:0;width:160px">
+  <div class="nikki-training-bottom">
+    <div class="nikki-polaroid p-left nikki-training-photo">
       <img src="img/nikki1.jpg" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=400&q=80'" alt="Nikki bereit" style="height:160px;object-fit:cover;width:148px">
       <div class="caption">Nikki &mdash; Abenteuer-Doodle</div>
     </div>
-    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="nikki-training-alerts">
     <div class="alert danger">
       <h3 style="color:var(--red);font-size:0.85rem;margin-bottom:8px">REISEAPOTHEKE (&lt; 500g)</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;color:var(--soft)">
