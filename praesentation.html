@@ -155,6 +155,44 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes kenBurns{0%{transform:scale(1) translate(0)}100%{transform:scale(1.08) translate(-1%,-1%)}}
+@keyframes tiltIn{from{opacity:0;transform:rotate(-5deg) scale(0.8)}to{opacity:1;transform:rotate(-3deg) scale(1)}}
+@keyframes tiltIn2{from{opacity:0;transform:rotate(4deg) scale(0.8)}to{opacity:1;transform:rotate(2deg) scale(1)}}
+@keyframes bounceIn{0%{opacity:0;transform:scale(0.3)}50%{opacity:1;transform:scale(1.05)}70%{transform:scale(0.95)}100%{transform:scale(1)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* NIKKI PHOTO ELEMENTS */
+.nikki-frame{width:110px;height:110px;border-radius:50%;object-fit:cover;
+  border:3px solid var(--gold);box-shadow:0 0 24px rgba(240,192,64,0.25),0 8px 20px rgba(0,0,0,0.3);
+  animation:float 4s ease-in-out infinite}
+.nikki-frame.lg{width:150px;height:150px;border-width:4px;box-shadow:0 0 32px rgba(240,192,64,0.3),0 12px 28px rgba(0,0,0,0.4)}
+.nikki-gallery{display:flex;gap:16px;margin-top:18px;justify-content:center;flex-wrap:wrap}
+.nikki-gallery .nikki-thumb{width:130px;height:130px;border-radius:14px;object-fit:cover;
+  border:2px solid var(--glassBorder);box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;
+  transition:transform .3s,box-shadow .3s;cursor:pointer}
+.nikki-gallery .nikki-thumb:hover{transform:scale(1.08) rotate(0deg)!important;box-shadow:0 12px 32px rgba(240,192,64,0.3);border-color:var(--gold)}
+.slide.active .nikki-gallery .nikki-thumb:nth-child(1){animation:tiltIn .6s ease both .2s;transform:rotate(-3deg)}
+.slide.active .nikki-gallery .nikki-thumb:nth-child(2){animation:tiltIn2 .6s ease both .35s;transform:rotate(2deg)}
+.slide.active .nikki-gallery .nikki-thumb:nth-child(3){animation:tiltIn .6s ease both .5s;transform:rotate(-2deg)}
+.slide.active .nikki-gallery .nikki-thumb:nth-child(4){animation:tiltIn2 .6s ease both .65s;transform:rotate(3deg)}
+.nikki-polaroid{z-index:2;background:rgba(255,255,255,0.06);display:inline-block;
+  padding:6px 6px 22px;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.08)}
+.nikki-polaroid img{width:100%;border-radius:2px;display:block}
+.nikki-polaroid .caption{text-align:center;font-size:0.65rem;color:var(--gold);margin-top:4px;font-weight:600;letter-spacing:0.5px}
+.slide.active .nikki-polaroid.p-left{animation:tiltIn .7s ease both .4s}
+.slide.active .nikki-polaroid.p-right{animation:tiltIn2 .7s ease both .5s}
+.nikki-badge{display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,rgba(240,192,64,0.15),rgba(240,192,64,0.05));
+  padding:8px 16px;border-radius:40px;border:1px solid rgba(240,192,64,0.2)}
+.nikki-badge img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)}
+.nikki-badge .nb-text{font-size:0.82rem;color:var(--gold);font-weight:600}
+.nikki-hero-float{position:absolute;z-index:2;animation:float 5s ease-in-out infinite}
+.slide.active .nikki-hero-float{animation:bounceIn .8s ease both .6s,float 5s ease-in-out infinite 1.4s}
+.nikki-kenburns{overflow:hidden;border-radius:14px}
+.nikki-kenburns img{width:100%;height:100%;object-fit:cover;animation:kenBurns 12s ease-in-out infinite alternate}
 .slide.active .card:nth-child(1){animation-delay:.1s}
 .slide.active .card:nth-child(2){animation-delay:.2s}
 .slide.active .card:nth-child(3){animation-delay:.25s}
@@ -279,11 +317,125 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <div class="tagline">Durch Deutschlands wildeste Täler nach Hause</div>
     <div style="height:2px;width:80px;background:var(--green);margin:0 auto 24px"></div>
     <div style="font-size:1.1rem;color:var(--soft);font-weight:300">Sven & Nikki &mdash; Potsdam nach Weiterstadt</div>
+    <!-- ERSETZE MIT ECHTEM NIKKI-FOTO: Nikki schaut in Kamera -->
+    <div style="margin:16px 0">
+      <div class="nikki-badge">
+        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=100&q=80" alt="Nikki">
+        <span class="nb-text">mit Nikki, dem Mini Goldendoodle</span>
+      </div>
+    </div>
     <div class="meta">
       <div class="item"><span class="num">10</span><span class="txt">Tage</span></div>
       <div class="item"><span class="num">267</span><span class="txt">Kilometer</span></div>
       <div class="item"><span class="num">6</span><span class="txt">Regionen</span></div>
       <div class="item"><span class="num">~1.200&euro;</span><span class="txt">Budget</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 1b: HINFAHRT NACH POTSDAM -->
+<div class="slide" data-n="1b">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--blue)">00</div><div class="date">Fr, 10. April</div></div>
+  <div class="day-hero">
+    <div class="highlight" style="background:linear-gradient(135deg,var(--blue),var(--purple))">DIE ANREISE</div>
+    <div class="day-title">Weiterstadt<br><span style="color:var(--blue)">&rarr; Potsdam</span></div>
+    <div class="day-sub">FlixTrain direkt nach Berlin. Nikkis erste lange Zugfahrt. In 5,5 Stunden beim Kumpel.</div>
+    <div class="day-stats">
+      <span>~5,5h Gesamtreise</span>
+      <span>FlixTrain FLX10</span>
+      <span>~27 EUR p.P.</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card c-blue">
+      <h3 style="color:var(--blue)">REISE-ROUTE</h3>
+      <div class="chain" style="margin:10px 0">
+        <div class="stop" style="border-top:3px solid var(--green)"><div class="tag" style="color:var(--green)">START</div><div class="name">Weiterstadt</div><div class="info">Bus WE3, 20 Min</div></div><div class="arr">&rarr;</div>
+        <div class="stop" style="border-top:3px solid var(--blue)"><div class="tag" style="color:var(--blue)">UMSTIEG</div><div class="name">Darmstadt Hbf</div><div class="info">FlixTrain, 4:30h</div></div><div class="arr">&rarr;</div>
+        <div class="stop" style="border-top:3px solid var(--purple)"><div class="tag" style="color:var(--purple)">UMSTIEG</div><div class="name">Berlin Hbf</div><div class="info">RE1, 25 Min</div></div><div class="arr">&rarr;</div>
+        <div class="stop" style="border-top:3px solid var(--gold)"><div class="tag" style="color:var(--gold)">ZIEL</div><div class="name">Potsdam</div><div class="info">Beim Kumpel!</div></div>
+      </div>
+      <ul>
+        <li><strong style="color:var(--blue)">FlixTrain FLX10:</strong> Direkt Darmstadt &rarr; Berlin!</li>
+        <li><strong style="color:var(--green)">Preis:</strong> ab 10-15 EUR + Hundeticket ~5-10 EUR</li>
+        <li>Bus WE3 + RE1 Berlin-Potsdam: je ~3-5 EUR</li>
+        <li><strong style="color:var(--gold)">Gesamt: ~22-33 EUR</strong> (ohne D-Ticket)</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <!-- ERSETZE MIT ECHTEM NIKKI-FOTO: Nikki mit Weste/Geschirr -->
+      <img class="card-img" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=70" alt="Nikki im Zug" style="height:100px">
+      <h3 style="color:var(--gold)">NIKKI IM FLIXTRAIN</h3>
+      <ul>
+        <li><strong style="color:var(--red)">PFLICHT: Maulkorb + Leine + Decke!</strong></li>
+        <li>Kinderticket fuer 7kg Doodle (~5-10 EUR)</li>
+        <li>Decke = ihr &bdquo;sicherer Ort&ldquo; im Zug</li>
+        <li>Wasser + Leckerlis griffbereit</li>
+        <li>Platz am Gang reservieren (mehr Beinfreiheit)</li>
+        <li>VOR der Fahrt: 30 Min Gassi!</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">PROFI-TIPPS</h3>
+      <ul>
+        <li><strong style="color:var(--purple)">Morgens fahren:</strong> weniger voll, ruhiger</li>
+        <li>Rucksack als Sichtschutz neben Nikki</li>
+        <li>Kau-Snack fuer die laengste Strecke (4:30h)</li>
+        <li>Handy laden im FlixTrain (USB-A Ports)</li>
+        <li>Berlin Hbf: Gassi-Pause am Spreeufer!</li>
+        <li><strong style="color:var(--green)">Ankunft Potsdam = Feiern!</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 1c: 9 TAGE IN POTSDAM -->
+<div class="slide" data-n="1c">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1599922407945-d5e3a8e0c429?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--purple)">9</div><div class="date">10.-19. April</div></div>
+  <div class="day-hero">
+    <div class="day-title">9 Tage Potsdam<br><span style="color:var(--purple)">Homeoffice & Erkunden</span></div>
+    <div class="day-sub">Beim Kumpel arbeiten, Sanssouci erkunden, Nikki an die Stadt gewoehnen. Die Ruhe vor dem Abenteuer.</div>
+    <div class="day-stats">
+      <span>Homeoffice</span>
+      <span>Sanssouci Park</span>
+      <span>Nikki-Training</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">POTSDAM ENTDECKEN</h3>
+      <ul>
+        <li><strong style="color:var(--gold)">Sanssouci Park:</strong> Hundefreundlich (angeleint!)</li>
+        <li>Hollaendisches Viertel: Cafes, Boutiquen, Backstein</li>
+        <li>Glienicker Bruecke: Agenten-Austausch im Kalten Krieg!</li>
+        <li>Babelsberg Park: Seen, Schloesser, Hund-Spaziergaenge</li>
+        <li>Templiner See: Baden + Nikki planscht</li>
+        <li>Brandenburger Tor Potsdam (ja, Potsdam hat auch eins!)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">NIKKI VORBEREITUNG VOR ORT</h3>
+      <ul>
+        <li><strong style="color:var(--green)">S-Bahn/RE testen:</strong> Kurze Strecken fahren!</li>
+        <li>Bahnhof Potsdam: Geraeusche, Menschen, Ansagen</li>
+        <li>Maulkorb-Training: taeglich 10-15 Min</li>
+        <li>Laengere Spaziergaenge: 5-8 km aufbauen</li>
+        <li>Neue Umgebung = perfektes Sozialisierungs-Training</li>
+        <li><strong style="color:var(--gold)">Ziel: Nikki ist reisefit am 19. April!</strong></li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">TAGESABLAUF</h3>
+      <ul>
+        <li><strong>Morgens:</strong> Gassi im Park, Fruehstueck, Homeoffice</li>
+        <li><strong>Mittags:</strong> Lunch-Break + Spaziergang am See</li>
+        <li><strong>Abends:</strong> Potsdam erkunden mit Kumpel</li>
+        <li><strong>Wochenende:</strong> Berlin Tagesausflug (Nikki kann mit!)</li>
+        <li>Ausruestung checken + letzte Einkaufe</li>
+        <li><strong style="color:var(--green)">18. April: PACK-ABEND!</strong></li>
+      </ul>
     </div>
   </div>
 </div>
@@ -318,6 +470,20 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
           <li>Zeckenschutz: Frontpro Kautablette monatlich</li>
           <li>Liebt: Wasser, Stöcker, neue Gerüche</li>
         </ul>
+      </div>
+    </div>
+    <!-- NIKKI FOTO-GALERIE: Ersetze alle 4 URLs mit echten Nikki-Fotos -->
+    <div style="margin-top:20px;text-align:center">
+      <div class="label" style="margin-bottom:10px;color:var(--gold)">NIKKI IN BILDERN</div>
+      <div class="nikki-gallery">
+        <!-- ERSETZE: Nikki auf Herbstblaettern -->
+        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=400&q=80" alt="Nikki auf Herbstblaettern" title="Abenteurerin">
+        <!-- ERSETZE: Nikki erkundet einen Weg -->
+        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=400&q=80" alt="Nikki erkundet Weg" title="Entdeckerin">
+        <!-- ERSETZE: Nikki mit Weste zuhause -->
+        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1583337130417-13219ce08018?auto=format&fit=crop&w=400&q=80" alt="Nikki mit Weste" title="Reisebereit">
+        <!-- ERSETZE: Nikki liegt mit Spielzeug -->
+        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1591946614720-90a587da4a36?auto=format&fit=crop&w=400&q=80" alt="Nikki mit Spielzeug" title="Kuschelmodus">
       </div>
     </div>
   </div>
@@ -652,6 +818,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   </div>
   <div class="day-cards">
     <div class="card">
+      <img class="card-img" src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&w=600&q=70" alt="Fachwerk Stolberg">
       <h3 style="color:var(--green)">HIGHLIGHTS</h3>
       <ul>
         <li>Stolberg: Fachwerk-Kleinod im Tal, autoarm</li>
@@ -721,11 +888,15 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     </div>
     <div class="card c-red">
       <h3 style="color:var(--red)">DER SHOT DER REISE</h3>
+      <!-- ERSETZE: Nikki von hinten auf einem Waldweg -->
+      <div class="nikki-kenburns" style="height:90px;margin-bottom:10px">
+        <img src="https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=600&q=70" alt="Nikki im Nebel">
+      </div>
       <ul>
         <li>Nikki auf einem Fels. Morgennebel. Lichtstrahl trifft sie.</li>
-        <li>ProRAW: +0.5 bis +1.0 EV (Nebel täuscht!)</li>
+        <li>ProRAW: +0.5 bis +1.0 EV (Nebel taeuscht!)</li>
         <li>Zeitraffer: 10 Min aufstellen</li>
-        <li><strong style="color:var(--gold)">Dafür lohnt sich 5:45 aufstehen.</strong></li>
+        <li><strong style="color:var(--gold)">Dafuer lohnt sich 5:45 aufstehen.</strong></li>
       </ul>
     </div>
   </div>
@@ -806,11 +977,12 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
       </ul>
     </div>
     <div class="card c-gold">
+      <img class="card-img" src="https://images.unsplash.com/photo-1504851149312-7a075b496cc7?auto=format&fit=crop&w=600&q=70" alt="Lagerfeuer Sternenhimmel">
       <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
       <ul>
-        <li>Trekkingplatz Rhönwald (15 EUR, STERNENLIEGEN!)</li>
+        <li>Trekkingplatz Rhoenwald (15 EUR, STERNENLIEGEN!)</li>
         <li>Alt: Pension Gersfeld (40-55 EUR, bei Regen)</li>
-        <li>Rhönforelle + Rhöner Schafkäse</li>
+        <li>Rhoenforelle + Rhoener Schafkaese</li>
         <li>Kloster Kreuzberg: Franziskaner-Bier, Brotzeit</li>
         <li><strong>Anreise:</strong> RE Sitzendorf &rarr; Fulda &rarr; RB52, ca. 3.5h</li>
       </ul>
@@ -818,7 +990,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <div class="card c-purple">
       <h3 style="color:var(--purple)">CONTENT-SHOT</h3>
       <ul>
-        <li>Milchstraße &mdash; Nacht-Modus + Gimbal als Stativ</li>
+        <li>Milchstrasse &mdash; Nacht-Modus + Gimbal als Stativ</li>
         <li>Timelapse Sternenhimmel: 15 Min = 30 Sek Video</li>
         <li>Schwarzes Moor Bohlenweg Panorama im Abendlicht</li>
         <li>Bohlenweg = Leine kurz halten (Naturschutz!)</li>
@@ -1102,7 +1274,13 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
       <li>9-10 km Wanderung</li><li>Verschiedene Gelände</li><li>Zug + Wanderung kombiniert</li>
       <li>Probe-Packen (&lt;12kg!)</li><li>Tierarzt-Check + Frontpro</li></ul></div>
   </div>
-  <div class="grid g2" style="margin-top:14px">
+  <div style="margin-top:14px;display:flex;gap:16px;align-items:stretch">
+    <!-- NIKKI FEATURED PHOTO: Ersetze mit echtem Nikki-Foto (mit Weste) -->
+    <div class="nikki-polaroid p-left" style="flex-shrink:0;width:160px">
+      <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=300&q=80" alt="Nikki bereit" style="height:160px;object-fit:cover;width:148px">
+      <div class="caption">Nikki &mdash; Abenteuer-Doodle</div>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <div class="alert danger">
       <h3 style="color:var(--red);font-size:0.85rem;margin-bottom:8px">REISEAPOTHEKE (&lt; 500g)</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;color:var(--soft)">
@@ -1117,8 +1295,9 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
         <strong>Pausen:</strong> Alle 60-90 Min, 10-15 Min liegen + Wasser<br>
         <strong>Max:</strong> 10-12 km/Tag (8-10 empfohlen), kein Wandern 11-15 Uhr bei &gt;22°C<br>
         <strong>Stresssignale:</strong> Gähnen, Nase lecken, Hecheln ohne Hitze &rarr; Situation ändern!<br>
-        <strong>Pfoten:</strong> Morgens + Abends prüfen, Balsam bei Trockenheit, zwischen Zehen trocknen
+        <strong>Pfoten:</strong> Morgens + Abends pruefen, Balsam bei Trockenheit, zwischen Zehen trocknen
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -1387,9 +1566,13 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <p>über Kammwege, durch kristallklare Täler, unter dem Sternenhimmel.</p>
     <div style="height:24px"></div>
     <p style="color:var(--gold);font-weight:600;font-size:1.3rem;font-family:'Playfair Display',serif">Deine erste Mehrtageswanderung.</p>
-    <p style="color:var(--gold);font-weight:600;font-size:1.3rem;font-family:'Playfair Display',serif">Nikkis erstes großes Abenteuer.</p>
+    <p style="color:var(--gold);font-weight:600;font-size:1.3rem;font-family:'Playfair Display',serif">Nikkis erstes grosses Abenteuer.</p>
     <div style="height:16px"></div>
-    <p style="color:var(--green);font-weight:700;font-size:1.6rem;font-family:'Playfair Display',serif">April 2026.</p>
+    <!-- ERSETZE: Nikki schaut in Kamera (Herbstblaetter-Foto) -->
+    <div style="margin:8px auto">
+      <img class="nikki-frame lg" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=300&q=80" alt="Nikki">
+    </div>
+    <p style="color:var(--green);font-weight:700;font-size:1.6rem;font-family:'Playfair Display',serif;margin-top:8px">April 2026.</p>
   </div>
 </div>
 
@@ -1397,7 +1580,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 
 <div class="nav">
   <button onclick="go(-1)">&#8592;</button>
-  <span class="counter" id="counter">1 / 24</span>
+  <span class="counter" id="counter">1 / 26</span>
   <button onclick="go(1)">&#8594;</button>
 </div>
 
@@ -1597,16 +1780,19 @@ function initDetailMap(){
 // Preload
 const imgs=[
   'photo-1502252430442-aac78f397426','photo-1612774412771-005ed8e861d2',
+  'photo-1474487548417-781cb71495f3','photo-1599922407945-d5e3a8e0c429',
   'photo-1621519994490-b87b9401599e','photo-1759062012196-ab43aef31a6f',
   'photo-1479030160180-b1860951d696','photo-1741328107513-77a81891a25c',
   'photo-1690310457081-71c3fb276e10','photo-1735508299591-8194ac4e3df9',
   'photo-1728932828860-f55c3891eb17','photo-1765825365130-52e276bca060',
   'photo-1755889825647-bd72449d29e4','photo-1506748686214-e9df14d4d9d0',
-  'photo-1535958636474-b021ee887b13',
+  'photo-1535958636474-b021ee887b13','photo-1590523741831-ab7e8b8f9c7f',
   'photo-1504674900247-0877df9cc836','photo-1587300003388-59208cc962cb',
   'photo-1548199973-03cce0bbc87b','photo-1502920917128-1aa500764cbd',
   'photo-1551632811-561732d1e306','photo-1464822759023-fed622ff2c3b',
-  'photo-1501555088652-021faa106b9b'
+  'photo-1501555088652-021faa106b9b','photo-1504851149312-7a075b496cc7',
+  'photo-1530281700549-e82e7bf110d6','photo-1583337130417-13219ce08018',
+  'photo-1591946614720-90a587da4a36'
 ];
 let loaded=0;
 const bar=document.getElementById('loadbar');
