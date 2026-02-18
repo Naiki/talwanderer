@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Talwanderer">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0f1a">
+<meta name="description" content="Talwanderer: 10 Tage, 267 km, Potsdam nach Weiterstadt. Sven & Nikki.">
+<title>TALWANDERER — Sven & Nikki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0f1a;--bg2:#111827;--bg3:#1e293b;
+  --green:#4ec9b0;--gold:#f0c040;--orange:#f97316;--red:#ef4444;
+  --blue:#60a5fa;--purple:#a78bfa;--forest:#22c55e;--teal:#2dd4bf;
+  --white:#f8fafc;--gray:#94a3b8;--soft:#cbd5e1;
+  --glass:rgba(15,23,42,0.7);--glass2:rgba(15,23,42,0.85);
+  --glassBorder:rgba(255,255,255,0.08);
+}
+html{font-size:16px}
+body{background:var(--bg);color:var(--white);font-family:'Inter',system-ui,sans-serif;overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
+
+.deck{height:100vh;width:100vw;position:relative}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;
+  opacity:0;transform:scale(1.02);transition:opacity .6s ease,transform .6s ease;
+  pointer-events:none;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.slide.active{opacity:1;transform:scale(1);pointer-events:auto}
+.slide.prev{opacity:0;transform:scale(.98)}
+.slide::-webkit-scrollbar{width:4px}
+.slide::-webkit-scrollbar-thumb{background:rgba(78,201,176,.4);border-radius:4px}
+
+.nav{position:fixed;bottom:max(24px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;gap:12px;align-items:center;
+  background:rgba(10,15,26,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:10px 28px;border-radius:40px;border:1px solid var(--glassBorder)}
+.nav button{background:none;border:1.5px solid rgba(78,201,176,.5);color:var(--green);
+  width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:16px;
+  transition:all .25s;display:flex;align-items:center;justify-content:center;font-weight:600}
+.nav button:hover{background:var(--green);color:var(--bg);border-color:var(--green)}
+.nav .counter{color:var(--gray);font-size:13px;min-width:55px;text-align:center;font-weight:500}
+.progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--green),var(--teal));transition:width .4s ease;z-index:101}
+
+.serif{font-family:'Playfair Display',Georgia,serif}
+h1{font-family:'Playfair Display',Georgia,serif;font-size:4.5rem;font-weight:900;line-height:1.05;letter-spacing:-1px}
+h2{font-family:'Playfair Display',Georgia,serif;font-size:2.2rem;font-weight:800;color:var(--white);margin-bottom:4px}
+h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.label{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--green)}
+.subtitle{color:var(--gray);font-size:1rem;margin-bottom:16px;font-weight:300}
+.divider{height:2px;background:linear-gradient(90deg,var(--green),transparent);margin:12px 0 20px;max-width:200px}
+
+/* HERO BACKGROUNDS - ohne position:relative auf .slide! */
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
+.hero-bg::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(10,15,26,0.15) 0%,rgba(10,15,26,0.4) 35%,rgba(10,15,26,0.85) 70%,rgba(10,15,26,0.97) 100%)}
+.slide>.hero-bg~*{position:relative;z-index:1}
+
+.card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-radius:16px;padding:20px;border:1px solid var(--glassBorder);
+  animation:fadeUp .6s ease both}
+.card h3{margin-bottom:10px}
+.card ul{list-style:none;padding:0}
+.card li{padding:4px 0;font-size:0.85rem;color:var(--soft);line-height:1.5}
+.card li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:10px;vertical-align:middle;flex-shrink:0}
+.card-img{width:100%;height:90px;object-fit:cover;border-radius:10px;margin-bottom:10px;opacity:0.9}
+.card.c-gold h3{color:var(--gold)}.card.c-gold li::before{background:var(--gold)}
+.card.c-orange h3{color:var(--orange)}.card.c-orange li::before{background:var(--orange)}
+.card.c-red h3{color:var(--red)}.card.c-red li::before{background:var(--red)}
+.card.c-blue h3{color:var(--blue)}.card.c-blue li::before{background:var(--blue)}
+.card.c-purple h3{color:var(--purple)}.card.c-purple li::before{background:var(--purple)}
+.card.c-forest h3{color:var(--forest)}.card.c-forest li::before{background:var(--forest)}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
+.g6{grid-template-columns:repeat(6,1fr)}
+
+.title-content{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;position:relative;z-index:1}
+.title-content h1{font-size:6rem;letter-spacing:6px;
+  background:linear-gradient(135deg,#fff 0%,var(--green) 50%,var(--teal) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+.title-content .tagline{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--soft);
+  font-style:italic;font-weight:400;margin-bottom:32px}
+.title-content .meta{display:flex;gap:24px;margin-top:24px}
+.title-content .meta .item{background:var(--glass);backdrop-filter:blur(12px);
+  padding:14px 28px;border-radius:12px;border:1px solid var(--glassBorder)}
+.title-content .meta .num{font-size:1.8rem;font-weight:800;color:var(--green);display:block}
+.title-content .meta .txt{font-size:0.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px}
+
+.day-badge{position:absolute;top:32px;left:40px;z-index:2;
+  background:var(--glass);backdrop-filter:blur(16px);
+  padding:8px 16px;border-radius:10px;border:1px solid var(--glassBorder)}
+.day-badge .num{font-size:2rem;font-weight:900;line-height:1}
+.day-badge .date{font-size:0.7rem;color:var(--gray);margin-top:2px}
+.day-hero{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:40px 50px 24px;position:relative;z-index:1}
+.day-hero .day-title{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;line-height:1.1;max-width:700px}
+.day-hero .day-sub{font-size:1rem;color:var(--soft);margin-top:8px;font-weight:300}
+.day-hero .day-stats{display:flex;gap:16px;margin-top:12px}
+.day-hero .day-stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:8px;font-size:0.78rem;color:var(--soft);font-weight:500}
+.day-cards{padding:0 50px 90px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;position:relative;z-index:1}
+.day-cards .card{padding:16px 18px}
+.day-cards .card li{font-size:0.82rem;padding:3px 0}
+
+.highlight{display:inline-block;background:linear-gradient(135deg,var(--gold),var(--orange));
+  color:var(--bg);font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:6px;
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+
+.alert{background:var(--glass);backdrop-filter:blur(10px);border-radius:14px;padding:16px 20px;
+  border:1px solid var(--glassBorder);margin-top:12px}
+.alert.warn{border-left:3px solid var(--orange)}
+.alert.ok{border-left:3px solid var(--green)}
+.alert.danger{border-left:3px solid var(--red)}
+
+.content-slide{padding:40px 50px 90px;background:var(--bg)}
+
+.chain{display:flex;align-items:stretch;gap:0;margin:20px 0;flex-wrap:wrap;justify-content:center}
+.chain .stop{background:var(--glass);backdrop-filter:blur(12px);border-radius:12px;
+  padding:12px 14px;text-align:center;min-width:100px;flex:1;max-width:130px;
+  border:1px solid var(--glassBorder)}
+.chain .stop .tag{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.chain .stop .name{font-size:0.85rem;font-weight:700}
+.chain .stop .info{font-size:0.7rem;color:var(--gray);margin-top:2px}
+.chain .arr{color:var(--green);font-size:1.2rem;display:flex;align-items:center;padding:0 2px;font-weight:300}
+
+.recipe{background:var(--glass);backdrop-filter:blur(10px);border-radius:14px;padding:16px;border:1px solid var(--glassBorder)}
+.recipe h3{font-size:0.85rem;letter-spacing:1px}
+.recipe .meta{font-size:0.72rem;color:var(--gray);margin-bottom:8px}
+.recipe ol{padding-left:16px;font-size:0.8rem;color:var(--soft);line-height:1.6}
+
+.tbl{display:grid;gap:3px;margin-top:8px}
+.tbl .row{display:grid;grid-template-columns:180px 160px 1fr;gap:0;
+  background:rgba(255,255,255,0.03);padding:8px 14px;border-radius:6px;font-size:0.82rem;align-items:center}
+.tbl .row:first-child{background:rgba(78,201,176,0.08);font-weight:600;color:var(--green);font-size:0.72rem;text-transform:uppercase;letter-spacing:1px}
+.tbl .c1{color:var(--gold);font-weight:600}
+.tbl .c2{color:var(--gray)}
+
+.week{background:var(--glass);backdrop-filter:blur(10px);border-radius:14px;padding:16px;border:1px solid var(--glassBorder)}
+.week h3{font-size:0.85rem;margin-bottom:2px}
+.week .wsub{font-size:0.75rem;color:var(--gray);margin-bottom:8px}
+.week li{font-size:0.78rem;padding:2px 0;color:var(--soft)}
+.week li::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:middle}
+
+.end-content{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;position:relative;z-index:1}
+.end-content h1{font-size:3.5rem;margin-bottom:24px;line-height:1.2}
+.end-content p{font-size:1.2rem;color:var(--soft);line-height:1.8;max-width:600px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.slide.active .card:nth-child(1){animation-delay:.1s}
+.slide.active .card:nth-child(2){animation-delay:.2s}
+.slide.active .card:nth-child(3){animation-delay:.25s}
+.slide.active .card:nth-child(4){animation-delay:.3s}
+.slide.active .card:nth-child(5){animation-delay:.35s}
+.slide.active .card:nth-child(6){animation-delay:.4s}
+.slide.active .day-hero{animation:fadeIn .8s ease both}
+.slide.active .day-badge{animation:fadeUp .5s ease both}
+.slide.active .highlight{animation:fadeUp .4s ease both}
+
+.check{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:0.9rem}
+.check .icon{width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.check .txt{color:var(--soft)}
+.check strong{color:var(--white)}
+
+.loader{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:opacity .5s}
+.loader.hidden{opacity:0;pointer-events:none}
+.loader h2{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:12px;
+  background:linear-gradient(135deg,var(--green),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.loader p{color:var(--gray);font-size:0.85rem}
+.loader .bar{width:200px;height:3px;background:var(--bg3);border-radius:3px;margin-top:16px;overflow:hidden}
+.loader .bar div{height:100%;background:var(--green);border-radius:3px;transition:width .3s;width:0%}
+
+/* MAP SLIDE */
+#tourmap{width:100%;height:100%;min-height:100vh;border-radius:0;z-index:0;flex:1}
+.map-slide{position:relative;overflow:hidden}
+.map-overlay{position:absolute;top:24px;left:40px;z-index:10;max-width:320px}
+.map-legend{position:absolute;bottom:100px;right:40px;z-index:10;
+  background:var(--glass);backdrop-filter:blur(16px);border-radius:14px;padding:16px 20px;
+  border:1px solid var(--glassBorder)}
+.map-legend .leg-item{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:0.82rem;color:var(--soft)}
+.map-legend .leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.map-legend h3{margin-bottom:8px}
+
+/* DETAIL MAP ICONS */
+#detailmap{width:100%;height:100%;min-height:100vh;border-radius:0;z-index:0;flex:1}
+.mi{display:flex;align-items:center;justify-content:center;border-radius:50%;
+  border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4);font-size:11px;font-weight:800;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,0.5);line-height:1}
+.mi-city{width:26px;height:26px;background:#60a5fa;border-radius:6px}
+.mi-poi{width:22px;height:22px;background:#f97316}
+.mi-accom{width:22px;height:22px;background:#a78bfa;border-radius:4px}
+.mi-nature{width:22px;height:22px;background:#22c55e}
+.mi-start{width:30px;height:30px;background:#f0c040;border-radius:6px;font-size:14px}
+.detail-legend{position:absolute;bottom:100px;right:24px;z-index:10;
+  background:var(--glass);backdrop-filter:blur(16px);border-radius:14px;padding:14px 18px;
+  border:1px solid var(--glassBorder);max-width:220px}
+.detail-legend .dl-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:0.78rem;color:var(--soft)}
+.detail-legend .dl-line{width:28px;height:4px;border-radius:2px;flex-shrink:0}
+.detail-legend .dl-icon{width:16px;height:16px;border-radius:50%;border:2px solid #fff;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:800}
+
+/* PROGRESS BARS */
+.budget-bar{margin:6px 0}
+.budget-bar .bar-label{display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:3px}
+.budget-bar .bar-label .bl{color:var(--soft)}.budget-bar .bar-label .bv{color:var(--green);font-weight:600}
+.budget-bar .bar-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.budget-bar .bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+
+/* WEIGHT INDICATOR */
+.weight-row{display:flex;align-items:center;gap:10px;padding:4px 0;font-size:0.82rem}
+.weight-row .wr-name{flex:1;color:var(--soft)}
+.weight-row .wr-bar{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.weight-row .wr-fill{height:100%;border-radius:3px}
+.weight-row .wr-kg{width:40px;text-align:right;font-weight:600;font-size:0.75rem}
+
+/* CONTENT-HERO: content-slide with subtle bg image */
+.content-hero{padding:40px 50px 90px;background:var(--bg)}
+.content-hero .hero-bg::after{
+  background:linear-gradient(to bottom,rgba(10,15,26,0.4) 0%,rgba(10,15,26,0.75) 15%,rgba(10,15,26,0.92) 35%,rgba(10,15,26,0.98) 100%)}
+.content-hero>.hero-bg~*{position:relative;z-index:1}
+
+/* COUNTDOWN TIMELINE */
+.timeline{display:flex;gap:0;margin:20px 0;position:relative}
+.timeline::before{content:'';position:absolute;top:20px;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--green),var(--gold),var(--orange),var(--red));border-radius:3px}
+.timeline .tl-step{flex:1;text-align:center;position:relative;padding-top:44px}
+.timeline .tl-dot{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:22px;height:22px;border-radius:50%;border:3px solid var(--bg);z-index:1;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--bg)}
+.timeline .tl-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.timeline .tl-items{font-size:0.78rem;color:var(--soft);line-height:1.6;text-align:left;padding:0 4px}
+.timeline .tl-items strong{color:var(--white)}
+
+/* STAT PILL */
+.stat-pill{display:inline-flex;align-items:center;gap:6px;
+  background:var(--glass);backdrop-filter:blur(8px);padding:6px 14px;border-radius:20px;
+  border:1px solid var(--glassBorder);font-size:0.78rem;color:var(--soft)}
+.stat-pill .sp-num{font-weight:800;font-size:1rem}
+
+@media(max-width:900px){
+  .title-content h1{font-size:3.5rem;letter-spacing:2px}
+  .title-content .meta{flex-wrap:wrap;gap:12px}
+  .day-hero .day-title{font-size:2rem}
+  .g3,.g4,.g5,.g6{grid-template-columns:1fr 1fr}
+  .day-cards{grid-template-columns:1fr;padding:0 24px 90px}
+  .content-slide{padding:24px 24px 90px}
+  .chain{gap:4px}.chain .stop{min-width:80px}
+  h1{font-size:2.5rem}h2{font-size:1.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <h2>TALWANDERER</h2>
+  <p>Lade Abenteuer...</p>
+  <div class="bar"><div id="loadbar"></div></div>
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<!-- FOLIE 1: HERO TITEL -->
+<div class="slide active" data-n="1">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1502252430442-aac78f397426?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="title-content">
+    <div class="label" style="margin-bottom:16px">10 TAGE &bull; 267 KM &bull; APRIL 2026</div>
+    <h1>TALWANDERER</h1>
+    <div class="tagline">Durch Deutschlands wildeste Täler nach Hause</div>
+    <div style="height:2px;width:80px;background:var(--green);margin:0 auto 24px"></div>
+    <div style="font-size:1.1rem;color:var(--soft);font-weight:300">Sven & Nikki &mdash; Potsdam nach Weiterstadt</div>
+    <div class="meta">
+      <div class="item"><span class="num">10</span><span class="txt">Tage</span></div>
+      <div class="item"><span class="num">267</span><span class="txt">Kilometer</span></div>
+      <div class="item"><span class="num">6</span><span class="txt">Regionen</span></div>
+      <div class="item"><span class="num">~1.200&euro;</span><span class="txt">Budget</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 2: TEAM -->
+<div class="slide" data-n="2">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1612774412771-005ed8e861d2?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:40px 50px 90px;position:relative;z-index:1">
+    <div class="label" style="margin-bottom:8px">DAS TEAM</div>
+    <h2 style="font-size:2.5rem;margin-bottom:20px">Sven & Nikki</h2>
+    <div class="grid g2" style="max-width:900px">
+      <div class="card">
+        <h3 style="color:var(--green)">SVEN &mdash; DER WANDERER</h3>
+        <ul>
+          <li>192cm, 90kg &mdash; <strong style="color:var(--gold)">erste Mehrtageswanderung!</strong></li>
+          <li>Fitness: 1.5h/Tag Spaziergänge mit Hund</li>
+          <li>Langschläfer &mdash; vor 9 Uhr ist Notfall</li>
+          <li>Liebt Einsamkeit, mystische Wälder, Stille</li>
+          <li>Filmt: iPhone 13 Pro Max + DJI Gimbal</li>
+          <li>Trinkt gerne lokale Biere & Wein</li>
+          <li>Motto: Durchdacht aber entspannt!</li>
+        </ul>
+      </div>
+      <div class="card c-gold">
+        <h3 style="color:var(--gold)">NIKKI &mdash; DIE ABENTEURERIN</h3>
+        <ul>
+          <li>Mini Goldendoodle, 7kg, 13 Monate jung</li>
+          <li><strong style="color:var(--red)">Gelenke noch im Wachstum! Max 10-12km/Tag</strong></li>
+          <li>Jagdtrieb: JA &rarr; IMMER an der Leine</li>
+          <li>Zug-Erfahrung: noch NIE &rarr; Training nötig!</li>
+          <li>Futter: HelloBello Trockenfutter + Snacks</li>
+          <li>Zeckenschutz: Frontpro Kautablette monatlich</li>
+          <li>Liebt: Wasser, Stöcker, neue Gerüche</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 3: INTERAKTIVE KARTE -->
+<div class="slide map-slide" data-n="3">
+  <div id="tourmap"></div>
+  <div class="map-overlay">
+    <div class="card" style="padding:20px 24px">
+      <div class="label" style="margin-bottom:8px">INTERAKTIVE KARTE</div>
+      <h2 style="font-size:1.6rem;margin-bottom:8px">Die ganze Tour</h2>
+      <div style="font-size:0.85rem;color:var(--soft);line-height:1.6">
+        267 km durch 6 Regionen.<br>
+        Jeder Marker ist klickbar.<br>
+        <span style="color:var(--green);font-weight:600">Zoom & Pan zum Erkunden.</span>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <span style="background:rgba(78,201,176,0.15);color:var(--green);padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:600">10 TAGE</span>
+        <span style="background:rgba(96,165,250,0.15);color:var(--blue);padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:600">11 STOPS</span>
+        <span style="background:rgba(240,192,64,0.15);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:600">D-TICKET</span>
+      </div>
+    </div>
+  </div>
+  <div class="map-legend">
+    <h3 style="color:var(--green)">LEGENDE</h3>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div> Start / Ziel</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div> Highlight</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div> Etappe</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--orange)"></div> Ruhetag</div>
+    <div class="leg-item"><div class="leg-dot" style="background:transparent;border:2px dashed var(--green);width:10px;height:2px;border-radius:0"></div> Route</div>
+  </div>
+</div>
+
+<!-- FOLIE 3b: DETAILLIERTE ROUTENKARTE -->
+<div class="slide map-slide" data-n="3b">
+  <div id="detailmap"></div>
+  <div class="map-overlay">
+    <div class="card" style="padding:18px 22px">
+      <div class="label" style="margin-bottom:6px;font-size:0.6rem">DETAILKARTE</div>
+      <h2 style="font-size:1.4rem;margin-bottom:6px">Route im Detail</h2>
+      <div style="font-size:0.8rem;color:var(--soft);line-height:1.5">
+        Alle POIs, Unterkünfte, Wanderwege<br>und Transportwege auf einen Blick.
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(34,197,94,0.15);color:var(--forest);padding:3px 8px;border-radius:6px;font-size:0.68rem;font-weight:600">WANDERN</span>
+        <span style="background:rgba(96,165,250,0.15);color:var(--blue);padding:3px 8px;border-radius:6px;font-size:0.68rem;font-weight:600">ZUG/BUS</span>
+        <span style="background:rgba(249,115,22,0.15);color:var(--orange);padding:3px 8px;border-radius:6px;font-size:0.68rem;font-weight:600">HIGHLIGHTS</span>
+      </div>
+    </div>
+  </div>
+  <div class="detail-legend">
+    <h3 style="color:var(--green);font-size:0.72rem;margin-bottom:8px">LEGENDE</h3>
+    <div class="dl-row"><div class="dl-line" style="background:var(--green)"></div> Wanderweg</div>
+    <div class="dl-row"><div class="dl-line" style="background:var(--blue);border:1px dashed var(--blue);background:transparent"></div> Zug / Bus</div>
+    <div class="dl-row"><div class="dl-line" style="background:var(--teal)"></div> Kanu-Route</div>
+    <div style="height:6px"></div>
+    <div class="dl-row"><div class="dl-icon" style="background:var(--gold);border-radius:4px">S</div> Start / Ziel</div>
+    <div class="dl-row"><div class="dl-icon" style="background:var(--blue);border-radius:4px">O</div> Stadt / Ort</div>
+    <div class="dl-row"><div class="dl-icon" style="background:var(--orange)">!</div> Sehenswürdigkeit</div>
+    <div class="dl-row"><div class="dl-icon" style="background:var(--green)">N</div> Natur-Highlight</div>
+    <div class="dl-row"><div class="dl-icon" style="background:var(--purple);border-radius:4px">U</div> Unterkunft</div>
+  </div>
+</div>
+
+<!-- FOLIE 4: ROUTE ÜBERBLICK -->
+<div class="slide content-hero" data-n="3">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label">DIE ROUTE</div>
+  <h2>10 Tage von Potsdam nach Hause</h2>
+  <div style="display:flex;gap:12px;margin:6px 0 14px;flex-wrap:wrap">
+    <span class="stat-pill"><span class="sp-num" style="color:var(--green)">267</span> km</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--gold)">6</span> Regionen</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--blue)">~100</span> km Wandern</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--purple)">8</span> Nächte</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--orange)">~1.260</span> EUR</span>
+  </div>
+  <div class="chain">
+    <div class="stop" style="border-top:3px solid var(--blue)"><div class="tag" style="color:var(--blue)">Tag 1-2</div><div class="name">Spreewald</div><div class="info">Kanu + Hund!</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--purple)"><div class="tag" style="color:var(--purple)">Tag 3</div><div class="name">Naumburg</div><div class="info">Weinberge</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--red)"><div class="tag" style="color:var(--red)">Tag 4</div><div class="name">Bodetal</div><div class="info">DIE Schlucht</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--gold)"><div class="tag" style="color:var(--gold)">Tag 5</div><div class="name">Harz</div><div class="info">Ruhetag</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--green)"><div class="tag" style="color:var(--green)">Tag 6</div><div class="name">Südharz</div><div class="info">Gipskarst</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--forest)"><div class="tag" style="color:var(--forest)">Tag 7</div><div class="name">Rennsteig</div><div class="info">Nebelwald!</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--teal)"><div class="tag" style="color:var(--teal)">Tag 8</div><div class="name">Schwarzatal</div><div class="info">Geheimtipp</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--purple)"><div class="tag" style="color:var(--purple)">Tag 9</div><div class="name">Rhön</div><div class="info">Sternenpark</div></div><div class="arr">&rarr;</div>
+    <div class="stop" style="border-top:3px solid var(--gold)"><div class="tag" style="color:var(--gold)">Tag 10</div><div class="name">Vogelsberg</div><div class="info">Heimkehr!</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div>
+      <div class="label" style="margin-bottom:10px">DEINE MUST-HAVES &mdash; ALLE ERFÜLLT</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div class="check"><div class="icon">&#10003;</div><div class="txt"><strong>Mystischer Nebelwald</strong> &mdash; Tag 7, Rennsteig</div></div>
+        <div class="check"><div class="icon">&#10003;</div><div class="txt"><strong>Wilde Schlucht</strong> &mdash; Tag 4, Bodetal 280m</div></div>
+        <div class="check"><div class="icon">&#10003;</div><div class="txt"><strong>Lagerfeuer-Feeling</strong> &mdash; Spreewald + Rhön</div></div>
+        <div class="check"><div class="icon">&#10003;</div><div class="txt"><strong>Abwechslung</strong> &mdash; Kanu, Wein, Schlucht, Sterne</div></div>
+        <div class="check"><div class="icon">&#10003;</div><div class="txt"><strong>In der Natur</strong> &mdash; Jeden einzelnen Tag</div></div>
+        <div class="check"><div class="icon">&#10003;</div><div class="txt"><strong>Kein Touristen-Stress</strong> &mdash; Geheimtipps</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:10px">TOUR-FAKTEN</div>
+      <div class="card" style="padding:14px 18px">
+        <ul>
+          <li><strong style="color:var(--green)">Transport:</strong> D-Ticket (63 EUR) + FlixTrain (30 EUR)</li>
+          <li><strong style="color:var(--gold)">Unterkünfte:</strong> Mix aus Camping, Trekking, Pension</li>
+          <li><strong style="color:var(--blue)">Wanderungen:</strong> 5-15 km/Tag, Nikki-freundlich</li>
+          <li><strong style="color:var(--purple)">Schwierigkeit:</strong> Einsteiger! Erste Mehrtageswanderung</li>
+          <li><strong style="color:var(--orange)">Highlights:</strong> Kanu, Sternenpark, Nebelwald, Schlucht</li>
+          <li><strong style="color:var(--red)">Saison:</strong> 19.-28. April 2026 (Brut-/Setzzeit!)</li>
+        </ul>
+      </div>
+      <div class="alert ok" style="margin-top:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:2rem;font-weight:900;color:var(--green);font-family:'Playfair Display',serif">63&euro;</div>
+          <div style="font-size:0.82rem"><strong style="color:var(--green)">Deutschlandticket = Freiheit.</strong><br>
+          <span style="color:var(--gray)">Alle Züge, alle Busse. Nikki kostenlos (&lt;10kg).</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 4: TAG 1-2 SPREEWALD -->
+<div class="slide" data-n="4">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1621519994490-b87b9401599e?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--blue)">01-02</div><div class="date">Sa-So, 19.-20. April</div></div>
+  <div class="day-hero">
+    <div class="highlight">ABENTEUER-START</div>
+    <div class="day-title">Spreewald<br><span style="color:var(--blue)">Kanu mit Hund</span></div>
+    <div class="day-sub">Stille Kanäle, Spreewald-Gurken, dein erstes Lagerfeuer der Tour</div>
+    <div class="day-stats">
+      <span>5-8 km Wandern</span>
+      <span>3-4h Paddeln</span>
+      <span>RE7+RE2, 1.5h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card">
+      <img class="card-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&fit=crop&w=600&q=70" alt="Kanu auf Fluss">
+      <h3 style="color:var(--green)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Kahnfahrt durch die Fließe (Nikki: 5 EUR)</li>
+        <li><strong style="color:var(--gold)">Kanu mit Nikki auf spiegelglattem Wasser!</strong></li>
+        <li>Bootsverleih Richter &mdash; Hund kostenlos im Kanu</li>
+        <li>Lehde: autofreies Dorf, nur per Boot erreichbar</li>
+        <li>Abends: Natur-Camping mit Hundestrand</li>
+        <li>Frühmorgens Nebel über den Kanälen &mdash; mystisch!</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Natur-Camping 'Am See' (27 EUR/Nacht, Hundestrand!)</li>
+        <li>Alt: Ferienhof Zum Spreewäldchen (45-70 EUR)</li>
+        <li>Leinöl-Kartoffeln + Quark (DER Spreewald-Klassiker!)</li>
+        <li>Spreewälder Gurken direkt vom Hof</li>
+        <li>Abend: Selbstgekocht am Camp + Spreewald-Bier</li>
+        <li><strong>Anreise:</strong> RE7 + RE2 ab Potsdam, ca. 1.5h</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">CONTENT-SHOT</h3>
+      <ul>
+        <li>Nikki im Kanu = YouTube Short #1!</li>
+        <li>Gimbal-Tracking vom Bug, POV-Perspektive</li>
+        <li>Stille Fließe im Abendlicht filmen</li>
+        <li>Goldendoodles sind Wasserratten &mdash; perfekt!</li>
+        <li><strong>Tipp:</strong> Sonnenaufgang auf dem Wasser = Gold</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 5: TAG 3 WEINBERGE -->
+<div class="slide" data-n="5">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1759062012196-ab43aef31a6f?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--purple)">03</div><div class="date">Mo, 21. April</div></div>
+  <div class="day-hero">
+    <div class="day-title">Saale-Unstrut<br><span style="color:var(--purple)">Weinberge & Steilhänge</span></div>
+    <div class="day-sub">Nördlichstes Qualitäts-Weinbaugebiet Deutschlands &mdash; Weinprobe am Abend</div>
+    <div class="day-stats">
+      <span>10 km Wandern</span>
+      <span>Freyburg &rarr; Naumburg</span>
+      <span>RE, 2.5h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card">
+      <img class="card-img" src="https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=600&q=70" alt="Weinberge">
+      <h3 style="color:var(--green)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Weinbergterrassen mit 1000-jährigen Trockenmauern</li>
+        <li>Unstruttal-Panoramaweg (wunderschön!)</li>
+        <li>Weinprobe: Müller-Thurgau, Silvaner, Weißburgunder</li>
+        <li>Mittelalterliche Dörfer entlang der Unstrut</li>
+        <li>Nördlichstes Qualitätsweingebiet Deutschlands!</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Pension Schleusenblick Freyburg (55 EUR)</li>
+        <li>Alt: Winzerhof (60-80 EUR, Weinprobe inkl.)</li>
+        <li>Winzerplatte + Unstrut-Wein am Abend</li>
+        <li>Schattige Abschnitte für Nikki, genug Wasser!</li>
+        <li><strong>Anreise:</strong> RE ab Lübbenau via Leipzig, ca. 2.5h</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">CONTENT-SHOT</h3>
+      <ul>
+        <li>Weinbergterrassen in goldener Stunde filmen</li>
+        <li>Gimbal Slow-Pan über Steilhänge + Tal</li>
+        <li>Nikki zwischen Weinreben &mdash; großer Hund/Kontrast</li>
+        <li><strong>Tipp:</strong> Lock-Modus für Reveal-Shot bergauf</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 6: TAG 4 BODETAL -->
+<div class="slide" data-n="6">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1479030160180-b1860951d696?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--red)">04</div><div class="date">Di, 22. April</div></div>
+  <div class="day-hero">
+    <div class="highlight" style="background:linear-gradient(135deg,var(--red),var(--orange))">MUST-HAVE: WILDE SCHLUCHT</div>
+    <div class="day-title">Bodetal<br><span style="color:var(--red)">280 Meter Granit</span></div>
+    <div class="day-sub">Die tiefste Schlucht nördlich der Alpen. Rauschende Bode. Roßtrappe.</div>
+    <div class="day-stats">
+      <span>9 km Wandern</span>
+      <span>Treseburg &rarr; Thale</span>
+      <span>RB, 3h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card c-red">
+      <img class="card-img" src="https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=600&q=70" alt="Schlucht">
+      <h3 style="color:var(--red)">HIGHLIGHTS</h3>
+      <ul>
+        <li>280m tiefe Granitschlucht &mdash; DRAMATISCH</li>
+        <li>Roßtrappe: Felsplateau mit Abgrund-Blick</li>
+        <li>Rauschende Bode &mdash; Nikki kann planschen</li>
+        <li>Bodetal im Morgennebel = MAGISCH</li>
+        <li><strong style="color:var(--gold)">Tiefste Schlucht nördlich der Alpen!</strong></li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Hotel Bodeblick Treseburg (100-Seelen-Dorf!)</li>
+        <li>Alt: FeWo Thale (45-65 EUR)</li>
+        <li>Harzer Roller + Brockenwurst + Schierker Feuerstein</li>
+        <li>HATIX = kostenloser ÖPNV im ganzen Harz!</li>
+        <li><strong>Anreise:</strong> RB Naumburg &rarr; Thale, ca. 3h</li>
+      </ul>
+    </div>
+    <div class="card c-orange">
+      <h3 style="color:var(--orange)">CONTENT-SHOT</h3>
+      <ul>
+        <li>Gimbal-Walk durch die Schlucht &mdash; THE Short</li>
+        <li>Slow-Mo 240fps: Bode-Wasser an Felsen</li>
+        <li>0.5x Ultraweit für die Enge der Schlucht!</li>
+        <li>Feste Leine in Schlucht! Pfade steinig + nass</li>
+        <li><strong>Tipp:</strong> Morgens 7 Uhr starten = allein!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 7: TAG 5 RUHETAG -->
+<div class="slide" data-n="7">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1741328107513-77a81891a25c?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--gold)">05</div><div class="date">Mi, 23. April</div></div>
+  <div class="day-hero">
+    <div class="day-title">Ruhetag<br><span style="color:var(--gold)">Ilsetal, kein Wecker</span></div>
+    <div class="day-sub">Ausschlafen. Waldbach. Brocken-Panorama ohne Brocken-Massen. Bier. Bett.</div>
+    <div class="day-stats">
+      <span>8-10 km entspannt</span>
+      <span>Heinrich-Heine-Weg</span>
+      <span>RB 30min</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card c-gold">
+      <img class="card-img" src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=70" alt="Waldbach">
+      <h3 style="color:var(--gold)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Heinrich-Heine-Weg entlang der Ilse</li>
+        <li>Eckertalsperre: stiller Bergsee, Brocken-Spiegelung</li>
+        <li>Brocken-Panorama (ohne Touristenmassen!)</li>
+        <li>Grünes Band: ehem. Grenze, jetzt Naturparadies</li>
+        <li>Abends: lokales Harz-Bier, früh ins Bett</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Blockhaus/Pension Ilsenburg (50-65 EUR)</li>
+        <li>Alt: Jugendherberge (25-35 EUR)</li>
+        <li>Frühstück: ausgiebig in Pension!</li>
+        <li>Mittag: Gasthof mit Nikki-freundlicher Terrasse</li>
+        <li>Abend: Hasseröder Bier + Harz-Abendessen</li>
+        <li><strong>Tipp:</strong> Wäsche waschen in der Pension!</li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <h3 style="color:var(--blue)">NIKKI-ERHOLUNG</h3>
+      <ul>
+        <li>Leichter Tag! Bach zum Planschen</li>
+        <li>Flache Wege, perfekt für junge Gelenke</li>
+        <li>Ilse-Fluss = Nikki-Paradies (flach, klar)</li>
+        <li>Halbzeit-Check: Pfoten, Stimmung, Futter</li>
+        <li><strong>Dailys:</strong> Hotel-WLAN für Genshin + HSR!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 8: TAG 6 SÜDHARZ -->
+<div class="slide" data-n="8">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1690310457081-71c3fb276e10?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--green)">06</div><div class="date">Do, 24. April</div></div>
+  <div class="day-hero">
+    <div class="day-title">Südharz<br><span style="color:var(--green)">Stolberg & Gipskarst</span></div>
+    <div class="day-sub">'Perle des Südharzes'. Ein See der verschwindet. Das größte Eisenkreuz der Welt.</div>
+    <div class="day-stats">
+      <span>10-12 km</span>
+      <span>Stolberg &rarr; Josephskreuz</span>
+      <span>RB+Bus, 2h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card">
+      <h3 style="color:var(--green)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Stolberg: Fachwerk-Kleinod im Tal, autoarm</li>
+        <li>Bauerngraben/Hungersee: See der VERSCHWINDET!</li>
+        <li>Gipskarst: Höhlen, Dolinen, weiße Felsen</li>
+        <li>Rüdigsdorfer Schweiz: EU-Naturerbe</li>
+        <li>Josephskreuz: 360-Grad-Panorama, größtes Eisenkreuz</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Blockhaus Fuchsbau (49 EUR, eingezäunter Garten!)</li>
+        <li>Alt: Pension Altstadt (40-55 EUR)</li>
+        <li>Thüringer Rostbratwurst + lokales Bier!</li>
+        <li>Nikki: frei laufen im eingezäunten Garten</li>
+        <li><strong>Anreise:</strong> RB Thale &rarr; Nordhausen, Bus &rarr; Stolberg</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">CONTENT-SHOT</h3>
+      <ul>
+        <li>Stolberg von oben: Fachwerk im Tal &mdash; Drohnen-Feeling</li>
+        <li>Josephskreuz 360-Grad-Panorama drehen</li>
+        <li>YouTube Short: 'Der See der VERSCHWINDET'</li>
+        <li><strong>Tipp:</strong> Hungersee Timelapse aufnehmen!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 9: TAG 7 NEBELWALD -->
+<div class="slide" data-n="9">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1735508299591-8194ac4e3df9?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--forest)">07</div><div class="date">Fr, 25. April</div></div>
+  <div class="day-hero">
+    <div class="highlight" style="background:linear-gradient(135deg,var(--forest),var(--teal))">MUST-HAVE #1 &mdash; DEIN MOMENT</div>
+    <div class="day-title">Mystischer Nebelwald<br><span style="color:var(--forest)">Rennsteig bei Schmücke</span></div>
+    <div class="day-sub">Schneekopf 978m. Vessertal UNESCO-Urwald. Moosbewachsene Felsen. KEIN MENSCH weit und breit.</div>
+    <div class="day-stats">
+      <span>10-12 km</span>
+      <span>Schneekopf + Vessertal</span>
+      <span>Bus+RB, 3h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card c-forest">
+      <img class="card-img" src="https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&fit=crop&w=600&q=70" alt="Nebelwald">
+      <h3 style="color:var(--forest)">DER MOMENT</h3>
+      <ul>
+        <li>Rennsteig im Morgennebel &mdash; absolute Stille</li>
+        <li>Schneekopf: 978m, zweithöchster Thüringens, 100km Sicht</li>
+        <li>Vessertal: UNESCO-Urwald, uralte Buchen, Moos</li>
+        <li>Beerberg-Hochmoor: mystische Moorlandschaft</li>
+        <li>Lagerfeuer am Trekkingplatz &mdash; DAS Erlebnis!</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Trekkingplatz Rennsteig (5-10 EUR, LAGERFEUER!)</li>
+        <li>Alt: Pension Schmiedefeld (40-55 EUR, warme Dusche)</li>
+        <li>Kaffee am Gaskocher bei Sonnenaufgang</li>
+        <li>Kocher-Nudeln am Lagerfeuer &mdash; bester Abend</li>
+        <li><strong>Anreise:</strong> Bus Stolberg &rarr; RB &rarr; Schmiedefeld, ca. 3h</li>
+      </ul>
+    </div>
+    <div class="card c-red">
+      <h3 style="color:var(--red)">DER SHOT DER REISE</h3>
+      <ul>
+        <li>Nikki auf einem Fels. Morgennebel. Lichtstrahl trifft sie.</li>
+        <li>ProRAW: +0.5 bis +1.0 EV (Nebel täuscht!)</li>
+        <li>Zeitraffer: 10 Min aufstellen</li>
+        <li><strong style="color:var(--gold)">Dafür lohnt sich 5:45 aufstehen.</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 10: TAG 8 SCHWARZATAL -->
+<div class="slide" data-n="10">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1728932828860-f55c3891eb17?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--teal)">08</div><div class="date">Sa, 26. April</div></div>
+  <div class="day-hero">
+    <div class="highlight" style="background:linear-gradient(135deg,var(--teal),var(--blue))">LETZTER GEHEIMTIPP</div>
+    <div class="day-title">Schwarzatal<br><span style="color:var(--teal)">53km Kerbtal im Wald</span></div>
+    <div class="day-sub">Steilste Standseilbahn, historische Mühlen, Schlossruine über dem Tal. Kaum Touristen.</div>
+    <div class="day-stats">
+      <span>12-15 km</span>
+      <span>Schwarzmühle &rarr; Schwarzburg</span>
+      <span>Bus+Bergbahn, 2h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card">
+      <img class="card-img" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=600&q=70" alt="Waldfluss">
+      <h3 style="color:var(--green)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Bergbahn: 25% Steigung, steilste Standseilbahn!</li>
+        <li>53km Kerbtal &mdash; Flusslandschaft des Jahres</li>
+        <li>Dichte Wälder, glasklare Bäche, historische Mühlen</li>
+        <li>Schloss Schwarzburg Ruine thront über dem Tal</li>
+        <li>Schwarza-Fluss = Bade- und Plansch-Paradies für Nikki!</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Pension Bergterrasse (50-60 EUR, Bergblick!)</li>
+        <li>Alt: FeWo am Bach (45-65 EUR, Bachrauschen)</li>
+        <li>Thüringer Klöße + Braten im Gasthaus</li>
+        <li>Hund: 5-6 EUR Aufschlag, Bergblick-Terrasse</li>
+        <li><strong>Anreise:</strong> Bus + Oberweißbacher Bergbahn</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">CONTENT-SHOT</h3>
+      <ul>
+        <li>Schwarzatal-Kerbtal: tief eingeschnitten, kaum Touristen</li>
+        <li>Bergbahn-Fahrt filmen &mdash; FPV-Modus am Gimbal!</li>
+        <li>Glasklare Schwarza mit Kaskaden + Nikki plantscht</li>
+        <li><strong>Tipp:</strong> Panoramaweg für Drohnen-ähnliche Shots</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 11: TAG 9 STERNENHIMMEL -->
+<div class="slide" data-n="11">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1765825365130-52e276bca060?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--purple)">09</div><div class="date">So, 27. April</div></div>
+  <div class="day-hero">
+    <div class="highlight" style="background:linear-gradient(135deg,var(--purple),var(--blue))">STERNENPARK</div>
+    <div class="day-title">Rhön<br><span style="color:var(--purple)">Milchstraße über dem Moor</span></div>
+    <div class="day-sub">Wasserkuppe 950m. Schwarzes Moor auf Bohlenwegen. Nachts: die Milchstraße mit bloßem Auge.</div>
+    <div class="day-stats">
+      <span>8-10 km</span>
+      <span>Wasserkuppe + Schwarzes Moor</span>
+      <span>RE, 3.5h (längster Transfer)</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card">
+      <img class="card-img" src="https://images.unsplash.com/photo-1507400492013-162706c8c05e?auto=format&fit=crop&w=600&q=70" alt="Sternenhimmel">
+      <h3 style="color:var(--green)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Wasserkuppe: 950m, höchster Berg Hessens!</li>
+        <li>Schwarzes Moor: Bohlenweg durch UNESCO-Biosphäre</li>
+        <li>'Land der offenen Fernen' &mdash; endlose Weite</li>
+        <li>Kloster Kreuzberg: legendärer Biergarten!</li>
+        <li><strong style="color:var(--purple)">NACHTS: Sternenpark! Milchstraße sichtbar!</strong></li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">UNTERKUNFT & ESSEN</h3>
+      <ul>
+        <li>Trekkingplatz Rhönwald (15 EUR, STERNENLIEGEN!)</li>
+        <li>Alt: Pension Gersfeld (40-55 EUR, bei Regen)</li>
+        <li>Rhönforelle + Rhöner Schafkäse</li>
+        <li>Kloster Kreuzberg: Franziskaner-Bier, Brotzeit</li>
+        <li><strong>Anreise:</strong> RE Sitzendorf &rarr; Fulda &rarr; RB52, ca. 3.5h</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">CONTENT-SHOT</h3>
+      <ul>
+        <li>Milchstraße &mdash; Nacht-Modus + Gimbal als Stativ</li>
+        <li>Timelapse Sternenhimmel: 15 Min = 30 Sek Video</li>
+        <li>Schwarzes Moor Bohlenweg Panorama im Abendlicht</li>
+        <li>Bohlenweg = Leine kurz halten (Naturschutz!)</li>
+        <li><strong>Tipp:</strong> Ab 22 Uhr auf Sternenliege &mdash; WOW!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 12: TAG 10 HEIMKEHR -->
+<div class="slide" data-n="12">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1755889825647-bd72449d29e4?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="day-badge"><div class="num" style="color:var(--gold)">10</div><div class="date">Mo, 28. April</div></div>
+  <div class="day-hero">
+    <div class="highlight" style="background:linear-gradient(135deg,var(--gold),var(--orange))">LETZTER TAG</div>
+    <div class="day-title">Vogelsberg<br><span style="color:var(--gold)">& nach Hause</span></div>
+    <div class="day-sub">Letzte Gipfeltour. Letzte Aussicht. Dann: deine Dusche, Nikkis Körbchen, PIZZA.</div>
+    <div class="day-stats">
+      <span>8 km + Heimreise</span>
+      <span>Hoherodskopf 764m</span>
+      <span>RB+S-Bahn, 4h</span>
+    </div>
+  </div>
+  <div class="day-cards">
+    <div class="card c-gold">
+      <img class="card-img" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=70" alt="Panorama">
+      <h3 style="color:var(--gold)">HIGHLIGHTS</h3>
+      <ul>
+        <li>Hoherodskopf: 764m, letzte Gipfeltour!</li>
+        <li>Vulkanring: moosbewachsene Buchenwälder</li>
+        <li>Niddaquelle: idyllischer Quellteich</li>
+        <li>Waldversteck TrollLand: 1300m&sup2; eingezäunter Garten!</li>
+        <li><strong style="color:var(--gold)">Nachmittags: ANKUNFT ZUHAUSE!</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">ESSEN & HEIMREISE</h3>
+      <ul>
+        <li>Letztes Kocher-Frühstück &mdash; genießen!</li>
+        <li>Mittag: Gasthof am Vogelsberg</li>
+        <li><strong>Route:</strong> Bus Schotten &rarr; Nidda &rarr; S6 Darmstadt</li>
+        <li>Ca. 2.5h Heimfahrt (D-Ticket!)</li>
+        <li><strong style="color:var(--gold)">Abend: PIZZA BESTELLEN! Du hast es verdient!</strong></li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <h3 style="color:var(--blue)">GESCHAFFT!</h3>
+      <ul>
+        <li>Letztes Panorama vom Hoherodskopf</li>
+        <li>Nikki auf dem Gipfel &mdash; Abschlussfoto!</li>
+        <li>Ankommen-Video für Instagram: Tür auf, Nikki rein</li>
+        <li>267 km, 10 Tage, 6 Regionen &mdash; GESCHAFFT!</li>
+        <li><strong>Nikki ist jetzt ein echter Abenteurer-Hund!</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 13: BUDGET -->
+<div class="slide content-slide" data-n="13">
+  <div class="label">BUDGET</div>
+  <h2>Was kostet das Abenteuer?</h2>
+  <div class="divider"></div>
+  <div class="grid g3" style="max-width:1100px">
+    <div class="card">
+      <h3 style="color:var(--green)">TOUR-KOSTEN (10 TAGE)</h3>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Deutschlandticket</span><span class="bv">63 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--green)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">FlixTrain (Mensch+Hund)</span><span class="bv">~30 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:4%;background:var(--blue)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Unterkünfte 8 Nächte</span><span class="bv">~350 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--purple)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Essen & Trinken</span><span class="bv">~175 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:23%;background:var(--gold)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Kanu Spreewald</span><span class="bv">~35 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--teal)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">AST / Taxi</span><span class="bv">~40 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--orange)"></div></div></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--glassBorder)">
+        <div style="font-size:1.4rem;font-weight:800;color:var(--green);font-family:'Playfair Display',serif">~693 EUR</div>
+        <div style="font-size:0.75rem;color:var(--gray)">Tour gesamt (Durchschnitt)</div>
+      </div>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">EQUIPMENT (EINMALIG)</h3>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Wanderschuhe</span><span class="bv">~105 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:18%;background:var(--gold)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Rucksack 40-50L</span><span class="bv">~105 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:18%;background:var(--gold)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Regenjacke</span><span class="bv">~60 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--orange)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Schlafsack + Isomatte</span><span class="bv">~105 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:18%;background:var(--orange)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Gaskocher + Topf</span><span class="bv">~40 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:7%;background:var(--red)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Merino-Shirts (3x)</span><span class="bv">~75 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:13%;background:var(--purple)"></div></div></div>
+      <div class="budget-bar"><div class="bar-label"><span class="bl">Hunde-Zubehör</span><span class="bv">~80 &euro;</span></div><div class="bar-track"><div class="bar-fill" style="width:14%;background:var(--red)"></div></div></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--glassBorder)">
+        <div style="font-size:1.4rem;font-weight:800;color:var(--gold);font-family:'Playfair Display',serif">~570 EUR</div>
+        <div style="font-size:0.75rem;color:var(--gray)">Equipment gesamt (Durchschnitt)</div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <h3 style="color:var(--teal)">BUDGET-ÜBERBLICK</h3>
+        <div style="text-align:center;padding:12px 0">
+          <div style="font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--green)">~1.263 &euro;</div>
+          <div style="font-size:0.85rem;color:var(--gray);margin-top:4px">Gesamt (Durchschnitt)</div>
+        </div>
+        <div style="margin:12px 0">
+          <div style="font-size:0.78rem;color:var(--soft);margin-bottom:4px">Ausschöpfung deines 3.000 EUR Budgets:</div>
+          <div style="height:12px;background:var(--bg3);border-radius:6px;overflow:hidden">
+            <div style="height:100%;width:42%;background:linear-gradient(90deg,var(--green),var(--teal));border-radius:6px"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--gray);margin-top:4px">
+            <span>42% genutzt</span><span>~1.737 EUR Reserve</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:rgba(78,201,176,0.1);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:1.2rem;font-weight:800;color:var(--green)">~69 &euro;</div>
+          <div style="font-size:0.68rem;color:var(--gray)">pro Tag Tour</div>
+        </div>
+        <div style="background:rgba(240,192,64,0.1);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:1.2rem;font-weight:800;color:var(--gold)">~44 &euro;</div>
+          <div style="font-size:0.68rem;color:var(--gray)">pro Nacht (Schnitt)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 14: PACKLISTE -->
+<div class="slide content-slide" data-n="14">
+  <div class="label">AUSRÜSTUNG</div>
+  <h2>Was muss in den Rucksack?</h2>
+  <div class="divider"></div>
+  <div class="grid g4">
+    <div class="card">
+      <h3 style="color:var(--green)">KLEIDUNG</h3>
+      <ul>
+        <li>Wanderschuhe (EINLAUFEN!)</li><li>Regenjacke (Gore-Tex)</li><li>3x Merino T-Shirts</li>
+        <li>2x Wanderhose (zip-off)</li><li>Fleecejacke</li><li>7x Unterwäsche+Socken</li><li>Schlafkleidung</li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <h3 style="color:var(--blue)">AUSRÜSTUNG</h3>
+      <ul>
+        <li>Rucksack 40-50L</li><li>Schlafsack (Komfort 5°C)</li><li>Isomatte</li>
+        <li>Gaskocher + Gas + Topf</li><li>Trinkflasche 1L</li><li>Stirnlampe</li><li>Erste-Hilfe-Set</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">TECHNIK</h3>
+      <ul>
+        <li>iPhone 13 Pro Max</li><li>DJI Osmo Mobile 7P</li><li>Powerbank 20.000mAh</li>
+        <li>USB-C Kabel (2x)</li><li>Ladegerät</li><li>Ziplock für Handy</li><li>Samsung T7 SSD</li>
+      </ul>
+    </div>
+    <div class="card c-red">
+      <h3 style="color:var(--red)">FÜR NIKKI</h3>
+      <ul>
+        <li>Wandergeschirr mit Griff</li><li>Leine + Schleppleine 5m</li><li>Maulkorb (FlixTrain!)</li>
+        <li>Hundedecke</li><li>Faltnapf (2x)</li><li>HelloBello 10 Tage</li><li>Kotbeutel + Zeckenzange</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="alert warn">
+      <h3 style="color:var(--orange);font-size:0.85rem;margin-bottom:8px">GEWICHT PRO KATEGORIE</h3>
+      <div class="weight-row"><span class="wr-name">Kleidung</span><div class="wr-bar"><div class="wr-fill" style="width:30%;background:var(--green)"></div></div><span class="wr-kg" style="color:var(--green)">~2.8 kg</span></div>
+      <div class="weight-row"><span class="wr-name">Ausrüstung</span><div class="wr-bar"><div class="wr-fill" style="width:40%;background:var(--blue)"></div></div><span class="wr-kg" style="color:var(--blue)">~3.5 kg</span></div>
+      <div class="weight-row"><span class="wr-name">Technik</span><div class="wr-bar"><div class="wr-fill" style="width:15%;background:var(--purple)"></div></div><span class="wr-kg" style="color:var(--purple)">~1.2 kg</span></div>
+      <div class="weight-row"><span class="wr-name">Nikki-Zubehör</span><div class="wr-bar"><div class="wr-fill" style="width:20%;background:var(--red)"></div></div><span class="wr-kg" style="color:var(--red)">~1.8 kg</span></div>
+      <div class="weight-row"><span class="wr-name">Essen (3 Tage)</span><div class="wr-bar"><div class="wr-fill" style="width:25%;background:var(--gold)"></div></div><span class="wr-kg" style="color:var(--gold)">~2.5 kg</span></div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--glassBorder);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:0.85rem;font-weight:700;color:var(--orange)">GESAMT</span>
+        <span style="font-size:1.2rem;font-weight:800;color:var(--orange)">~11.8 kg</span>
+      </div>
+    </div>
+    <div class="alert ok">
+      <h3 style="color:var(--green);font-size:0.85rem;margin-bottom:8px">PROFI-TIPPS GEWICHT SPAREN</h3>
+      <ul style="list-style:none;padding:0;font-size:0.82rem;color:var(--soft);line-height:1.7">
+        <li style="padding:2px 0"><strong style="color:var(--green)">Merino statt Baumwolle</strong> &mdash; 3 Tage tragbar, kein Geruch</li>
+        <li style="padding:2px 0"><strong style="color:var(--green)">HelloBello per Packstation</strong> &mdash; spart 1.2 kg!</li>
+        <li style="padding:2px 0"><strong style="color:var(--green)">Zip-Off Hosen</strong> &mdash; 2 Hosen = 4 Optionen</li>
+        <li style="padding:2px 0"><strong style="color:var(--red)">NICHT mitnehmen:</strong> Laptop, Bücher, 'nur für den Fall'</li>
+        <li style="padding:2px 0"><strong style="color:var(--red)">Jedes Gramm zählt</strong> &mdash; alles wiegen vor dem Packen!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 15: ESSEN & BIER -->
+<div class="slide content-hero" data-n="15">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label">ESSEN & TRINKEN</div>
+  <h2>Kocher-Rezepte & lokale Küche</h2>
+  <div style="display:flex;gap:12px;margin:8px 0 16px">
+    <span class="stat-pill"><span class="sp-num" style="color:var(--green)">5</span> Rezepte</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--gold)">6</span> Regionen</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--orange)">8 Min</span> Durchschnitt</span>
+  </div>
+  <div class="grid g5">
+    <div class="recipe"><h3 style="color:var(--green)">TOMATEN-THUNFISCH-NUDELN</h3><div class="meta">10 Min | 650 kcal | 1 Topf</div>
+      <ol><li>150g Nudeln + 300ml Wasser</li><li>3 Min kochen</li><li>Thunfisch + Tomatenmark rein</li><li>2 Min köcheln &mdash; fertig!</li></ol></div>
+    <div class="recipe"><h3 style="color:var(--gold)">COUSCOUS-LINSEN-BOWL</h3><div class="meta">8 Min | 600 kcal | Kein Kochen!</div>
+      <ol><li>Couscous + kochendes Wasser</li><li>5 Min quellen</li><li>Linsen-Paste einrühren</li><li>Parmesan drauf!</li></ol></div>
+    <div class="recipe"><h3 style="color:var(--orange)">RAMEN MIT EI</h3><div class="meta">8 Min | 550 kcal | Wärmt!</div>
+      <ol><li>Ramen + 400ml Wasser</li><li>Nudeln + Gewürz 3 Min</li><li>Ei drauf, Deckel 2 Min</li><li>Ei stockt perfekt</li></ol></div>
+    <div class="recipe"><h3 style="color:var(--red)">SPECK-COUSCOUS-KÄSE</h3><div class="meta">8 Min | 700 kcal | Sattmacher</div>
+      <ol><li>Couscous quellen lassen</li><li>Speck-Würfel rein</li><li>Parmesan + Pfeffer</li><li>Perfekt nach langem Tag</li></ol></div>
+    <div class="recipe"><h3 style="color:var(--blue)">GEMÜSE-SUPPE</h3><div class="meta">7 Min | 350 kcal | Leicht</div>
+      <ol><li>Brühpulver + 500ml Wasser</li><li>Aufkochen</li><li>Einlage nach Wahl</li><li>Knäckebrot dippen!</li></ol></div>
+  </div>
+  <div style="margin-top:16px">
+    <div class="label" style="margin-bottom:10px;font-size:0.65rem">REGIONALE SPEZIALITÄTEN ENTLANG DER ROUTE</div>
+    <div class="grid g6">
+      <div class="card" style="padding:12px;text-align:center"><h3 style="color:var(--blue);font-size:0.7rem">SPREEWALD</h3><div style="font-size:0.78rem;color:var(--soft)">Leinöl-Kartoffeln<br>Spreewälder Gurken</div></div>
+      <div class="card" style="padding:12px;text-align:center"><h3 style="color:var(--purple);font-size:0.7rem">SAALE-UNSTRUT</h3><div style="font-size:0.78rem;color:var(--soft)">Winzerplatte<br>Müller-Thurgau</div></div>
+      <div class="card" style="padding:12px;text-align:center"><h3 style="color:var(--green);font-size:0.7rem">HARZ</h3><div style="font-size:0.78rem;color:var(--soft)">Harzer Roller<br>Schierker Feuerstein</div></div>
+      <div class="card" style="padding:12px;text-align:center"><h3 style="color:var(--gold);font-size:0.7rem">THÜRINGEN</h3><div style="font-size:0.78rem;color:var(--soft)">Rostbratwurst<br>Mutzbraten</div></div>
+      <div class="card" style="padding:12px;text-align:center"><h3 style="color:var(--orange);font-size:0.7rem">RHÖN</h3><div style="font-size:0.78rem;color:var(--soft)">Rhönforelle<br>Schafkäse</div></div>
+      <div class="card" style="padding:12px;text-align:center"><h3 style="color:var(--red);font-size:0.7rem">HESSEN</h3><div style="font-size:0.78rem;color:var(--soft)">Handkäs mit Musik<br>Grüne Soße</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 16: BIER & WEIN GUIDE -->
+<div class="slide" data-n="16">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:40px 50px 90px;position:relative;z-index:1">
+    <div class="label" style="margin-bottom:8px">PROST!</div>
+    <h2 style="font-size:2rem;margin-bottom:16px">Bier & Wein entlang der Route</h2>
+    <div class="grid g3" style="max-width:1100px">
+      <div class="card">
+        <h3 style="color:var(--gold)">BIER-HIGHLIGHTS</h3>
+        <ul>
+          <li><strong style="color:var(--gold)">Köstritzer Schwarzbier</strong> &mdash; DDR-Kultbier, dunkel, malzig. Überall in Thüringen</li>
+          <li><strong style="color:var(--gold)">Kloster Kreuzberg</strong> &mdash; Franziskanerkloster in der Rhön, legendärer Biergarten!</li>
+          <li><strong style="color:var(--gold)">Rhöner Brauhaus</strong> &mdash; Kupfer-Märzen + Natur-Radler. Ehrlich regional</li>
+          <li><strong style="color:var(--gold)">Hasseröder / Wernigeroder</strong> &mdash; Harz-Klassiker, überall erhältlich</li>
+          <li><strong style="color:var(--gold)">Henneberger Bräu</strong> &mdash; Südthüringer Geheimtipp!</li>
+        </ul>
+      </div>
+      <div class="card c-purple">
+        <h3 style="color:var(--purple)">WEIN-ROUTE</h3>
+        <ul>
+          <li><strong style="color:var(--purple)">Saale-Unstrut (Tag 3)</strong> &mdash; Nördlichstes Qualitätsweingebiet Deutschlands</li>
+          <li>Müller-Thurgau: frisch, leicht, perfekt zum Wandern</li>
+          <li>Silvaner: trocken, mineralisch, Winzerplatte dazu!</li>
+          <li>Weißburgunder: elegant, zum Abendessen</li>
+          <li><strong>Tipp:</strong> Winzerhof mit Weinprobe buchen!</li>
+        </ul>
+      </div>
+      <div class="card c-orange">
+        <h3 style="color:var(--orange)">STRATEGIE</h3>
+        <ul>
+          <li>Überall nach <strong>'Hausbier vom Fass'</strong> fragen</li>
+          <li>Gasthöfe haben oft lokales Bier das es nirgends zu kaufen gibt</li>
+          <li>In Thüringen: Rostbratwurst + Bier = heilige Kombination</li>
+          <li>Rhön: Kloster Kreuzberg = Pflicht-Stopp (auch ohne Kirchenbesuch)</li>
+          <li><strong style="color:var(--red)">Max 2 Bier am Wandertag!</strong> Dehydrierung!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 17: NIKKI VORBEREITUNG -->
+<div class="slide content-hero" data-n="17">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label">NIKKI</div>
+  <h2>8-Wochen Trainingsplan</h2>
+  <div style="display:flex;gap:12px;margin:4px 0 12px">
+    <span class="stat-pill"><span class="sp-num" style="color:var(--green)">8</span> Wochen</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--gold)">4</span> Phasen</span>
+    <span class="stat-pill" style="color:var(--red);font-weight:600">Start SOFORT!</span>
+  </div>
+  <div class="grid g4">
+    <div class="week"><h3 style="color:var(--green)">WOCHE 1-2</h3><div class="wsub">Geräusch-Desensibilisierung</div><ul>
+      <li>Zuggeräusche abspielen (YouTube)</li><li>Bahnhof besuchen, 3-4 mal</li><li>Maulkorb-Training: 5min/Tag</li>
+      <li>Tragetasche aufstellen + Leckerlis</li><li>Wanderungen: 3-4 km flach</li></ul></div>
+    <div class="week"><h3 style="color:var(--blue)">WOCHE 3-4</h3><div class="wsub">Erste Zugfahrten</div><ul>
+      <li>Kurze Zugfahrt: 2-3 Stationen</li><li>NICHT Hauptverkehrszeit!</li><li>Decke als 'sicherer Ort'</li>
+      <li>Maulkorb 10min tragen</li><li>Wanderungen: 5-6 km hügelig</li></ul></div>
+    <div class="week"><h3 style="color:var(--gold)">WOCHE 5-6</h3><div class="wsub">Längere Fahrten + Belastung</div><ul>
+      <li>30-45 Min Zugfahrt</li><li>Umsteigen üben!</li><li>Tragetasche: Nikki geht freiwillig rein</li>
+      <li>Wanderungen: 7-8 km</li><li>Ermüdungszeichen beobachten</li></ul></div>
+    <div class="week"><h3 style="color:var(--orange)">WOCHE 7-8</h3><div class="wsub">Reise-Simulation!</div><ul>
+      <li>9-10 km Wanderung</li><li>Verschiedene Gelände</li><li>Zug + Wanderung kombiniert</li>
+      <li>Probe-Packen (&lt;12kg!)</li><li>Tierarzt-Check + Frontpro</li></ul></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="alert danger">
+      <h3 style="color:var(--red);font-size:0.85rem;margin-bottom:8px">REISEAPOTHEKE (&lt; 500g)</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;color:var(--soft)">
+        <div>Sterile Mullkompressen, VetWrap, Kochsalzlösung, Pinzette, Zeckenkarte, Wunddesinfektion</div>
+        <div>Aktivkohle (Vergiftung!), Fenistil Gel, Pfoten-Creme, Augentropfen, Rettungsfolie, LED-Clip</div>
+      </div>
+      <div style="margin-top:8px;text-align:center;color:var(--red);font-weight:700;font-size:0.85rem">IBUPROFEN / ASPIRIN / PARACETAMOL = TÖDLICH FÜR HUNDE!</div>
+    </div>
+    <div class="alert ok">
+      <h3 style="color:var(--green);font-size:0.85rem;margin-bottom:8px">UNTERWEGS-REGELN</h3>
+      <div style="font-size:0.8rem;color:var(--soft);line-height:1.6">
+        <strong>Pausen:</strong> Alle 60-90 Min, 10-15 Min liegen + Wasser<br>
+        <strong>Max:</strong> 10-12 km/Tag (8-10 empfohlen), kein Wandern 11-15 Uhr bei &gt;22°C<br>
+        <strong>Stresssignale:</strong> Gähnen, Nase lecken, Hecheln ohne Hitze &rarr; Situation ändern!<br>
+        <strong>Pfoten:</strong> Morgens + Abends prüfen, Balsam bei Trockenheit, zwischen Zehen trocknen
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 18: NIKKI NOTFALL -->
+<div class="slide content-hero" data-n="18">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label" style="color:var(--red)">NIKKI &mdash; NOTFALL</div>
+  <h2>Notfall-Pläne & Abbruch-Kriterien</h2>
+  <div style="display:flex;gap:12px;margin:4px 0 12px">
+    <span class="stat-pill" style="border-color:rgba(239,68,68,0.3)"><span class="sp-num" style="color:var(--red)">4</span> Szenarien</span>
+    <span class="stat-pill" style="border-color:rgba(239,68,68,0.3)"><span class="sp-num" style="color:var(--orange)">6</span> Abbruch-Kriterien</span>
+    <span class="stat-pill" style="border-color:rgba(78,201,176,0.3);color:var(--green);font-weight:600">Vorsorge = Sicherheit</span>
+  </div>
+  <div class="grid g4">
+    <div class="card">
+      <h3 style="color:var(--green)">LAHMHEIT</h3>
+      <ul><li>Sofort Pause, liegen lassen</li><li>Alle 4 Pfoten untersuchen</li><li>Beine abtasten (Wärme?)</li>
+        <li>Dorn? Pinzette + Verband</li><li>&gt;30 Min &rarr; Tierarzt</li></ul>
+    </div>
+    <div class="card c-orange">
+      <h3 style="color:var(--orange)">DURCHFALL</h3>
+      <ul><li>Leicht: 6-12h kein Futter, nur Wasser</li><li>Danach: Reis + Huhn (Schonkost)</li>
+        <li>Schwer (wässrig/Blut): SOFORT Tierarzt!</li><li>7kg Hund dehydriert SCHNELL</li></ul>
+    </div>
+    <div class="card c-red">
+      <h3 style="color:var(--red)">HITZSCHLAG (NOTFALL!)</h3>
+      <ul><li>Symptome: Keuchen, Taumeln, Erbrechen</li><li>In den Schatten &mdash; sofort!</li>
+        <li>Kühles (NICHT eiskaltes!) Wasser</li><li>Tierarzt AUCH wenn besser!</li></ul>
+    </div>
+    <div class="card c-blue">
+      <h3 style="color:var(--blue)">UNTERKÜHLUNG</h3>
+      <ul><li>Symptome: Zittern, Steifheit, Apathie</li><li>Aus Wind/Nässe bringen</li>
+        <li>Rettungsfolie / Jacke</li><li>Körperwärme (an dich drücken)</li></ul>
+    </div>
+  </div>
+  <div class="alert warn" style="margin-top:14px">
+    <h3 style="color:var(--orange);font-size:0.85rem;margin-bottom:8px">WANN ABBRECHEN? (Keine Niederlage!)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:0.82rem;color:var(--soft)">
+      <div>Lahmheit &gt; 1 Tag oder kehrt täglich wieder</div>
+      <div>Hitzschlag/Unterkühlung aufgetreten</div>
+      <div>Nikki frisst seit 48h nichts</div>
+      <div>Nikki verweigert Weitergehen dauerhaft</div>
+      <div>Durchfall &gt; 24 Stunden</div>
+      <div>Sie ist dauerhaft gestresst</div>
+    </div>
+    <div style="text-align:center;margin-top:10px;color:var(--soft);font-style:italic;font-size:0.9rem">
+      &bdquo;Lieber 5 schöne Tage als 10, von denen die letzten 5 eine Qual sind.&ldquo;</div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3 style="color:var(--gold)">TIERARZT-NUMMERN (VOR DER REISE INS HANDY!)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;font-size:0.82rem;margin-top:4px">
+      <div style="color:var(--soft)"><strong style="color:var(--white)">Notruf:</strong> 112</div>
+      <div style="color:var(--soft)"><strong style="color:var(--white)">Tiernotdienst:</strong> 0800-1110111</div>
+      <div style="color:var(--soft)"><strong style="color:var(--white)">Giftnotruf:</strong> 06131-19240</div>
+      <div style="color:var(--soft)"><strong style="color:var(--white)">Darmstadt:</strong> Stamm-Tierarzt!</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 19: FOTO & CONTENT -->
+<div class="slide content-hero" data-n="19">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label">FOTO & VIDEO</div>
+  <h2>Top-Locations & Gimbal-Techniken</h2>
+  <div style="display:flex;gap:12px;margin:4px 0 12px">
+    <span class="stat-pill"><span class="sp-num" style="color:var(--green)">iPhone 13 Pro</span></span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--gold)">DJI Osmo 7P</span></span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--purple)">8</span> Short Ideas</span>
+  </div>
+  <div class="grid g3">
+    <div class="card c-forest">
+      <h3 style="color:var(--forest)">NEBELWALD-AKTIONSPLAN</h3>
+      <ul>
+        <li><strong>Abend vorher:</strong> kachelmannwetter.de checken</li>
+        <li>Tiefsttemperatur &lt;8°C + Taupunkt-Differenz &lt;3°C = NEBEL!</li>
+        <li><strong>Phase 1 (6:30-7:15):</strong> Kamm &mdash; Nebel als Teppich unter dir</li>
+        <li><strong>Phase 2 (7:15-8:30):</strong> Tal &mdash; Nebelschwaden, Lichtstrahlen!</li>
+        <li>ProRAW: +0.5 bis +1.0 EV, Weißabgleich 5500K</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">DJI OSMO 7P MODI</h3>
+      <ul>
+        <li><strong>Follow:</strong> Standard, folgt Richtung</li>
+        <li><strong>Lock:</strong> Feste Richtung &mdash; Reveal-Shots!</li>
+        <li><strong>FPV:</strong> Alle Achsen frei, immersiv</li>
+        <li><strong>Active Track 6.0:</strong> Nikki antippen &mdash; Gimbal folgt</li>
+        <li><strong>Regel #1:</strong> JEDE Bewegung 3x LANGSAMER!</li>
+      </ul>
+    </div>
+    <div class="card c-gold">
+      <h3 style="color:var(--gold)">TOP IPHONE-SETTINGS</h3>
+      <ul>
+        <li><strong>Bodetal:</strong> 0.5x Ultraweit, Slow-Mo 240fps</li>
+        <li><strong>Nebelwald:</strong> ProRAW, Expo +0.5 EV</li>
+        <li><strong>Sternenhimmel:</strong> Nacht-Modus, Gimbal als Stativ</li>
+        <li><strong>Allgemein:</strong> 4K 30fps, HDR Video AN</li>
+        <li>Backup JEDEN Abend auf SSD!</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3 style="color:var(--purple)">8 YOUTUBE SHORT IDEAS</h3>
+    <div class="tbl">
+      <div class="row"><span>#</span><span>Titel</span><span>Beschreibung</span></div>
+      <div class="row"><span class="c1">#1</span><span class="c2">Nikkis ERSTER Kanu-Trip</span><span>POV Kanu, Nikki am Bug, spiegelglattes Wasser</span></div>
+      <div class="row"><span class="c1">#2</span><span class="c2">280m Schlucht mit Hund</span><span>Bodetal Gimbal-Walk, Felswände links und rechts</span></div>
+      <div class="row"><span class="c1">#3</span><span class="c2">Mystischer Nebelwald</span><span>Zeitraffer + Nikki-Reveal + Atemwolke im Morgenlicht</span></div>
+      <div class="row"><span class="c1">#4</span><span class="c2">Engste Schlucht Deutschlands</span><span>Drachenschlucht 68cm, Nikki voraus, Tunnel-Shot</span></div>
+      <div class="row"><span class="c1">#5</span><span class="c2">Milchstraße über der Rhön</span><span>Sternenpark Timelapse, 15 Min = 30 Sek</span></div>
+      <div class="row"><span class="c1">#6</span><span class="c2">Der See der VERSCHWINDET</span><span>Hungersee: Karstöhle verschluckt ganzen See</span></div>
+      <div class="row"><span class="c1">#7</span><span class="c2">10 Tage Wandern mit Hund</span><span>Best-of Zusammenschnitt, Vorher/Nachher</span></div>
+      <div class="row"><span class="c1">#8</span><span class="c2">So sieht Wandern WIRKLICH aus</span><span>Behind-the-Scenes: Regen, müde, echte Momente</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 20: SICHERHEIT & COUNTDOWN -->
+<div class="slide content-hero" data-n="20">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label">VORBEREITUNG</div>
+  <h2>Countdown zur Abreise</h2>
+  <div style="display:flex;gap:12px;margin:4px 0 16px">
+    <span class="stat-pill"><span class="sp-num" style="color:var(--green)">8</span> Wochen</span>
+    <span class="stat-pill"><span class="sp-num" style="color:var(--gold)">19.</span> April</span>
+    <span class="stat-pill" style="color:var(--orange);font-weight:600">Jetzt starten!</span>
+  </div>
+  <div class="timeline">
+    <div class="tl-step">
+      <div class="tl-dot" style="background:var(--green)">1</div>
+      <div class="tl-label" style="color:var(--green)">SOFORT</div>
+      <div class="tl-items">
+        <strong>Wanderschuhe</strong> kaufen + EINLAUFEN!<br>
+        Nikki <strong>Maulkorb-Training</strong><br>
+        Nikki <strong>Zug-Training</strong> starten<br>
+        <strong>FlixTrain</strong> buchen<br>
+        Trekkingplätze reservieren
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot" style="background:var(--gold)">2</div>
+      <div class="tl-label" style="color:var(--gold)">4-6 WOCHEN</div>
+      <div class="tl-items">
+        <strong>Rucksack</strong> + Schlafsack + Isomatte<br>
+        <strong>Regenjacke</strong> + Merino-Shirts<br>
+        Gaskocher + Topf<br>
+        Nikki: <strong>erste Zugfahrt!</strong><br>
+        D-Ticket App installieren
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot" style="background:var(--orange)">3</div>
+      <div class="tl-label" style="color:var(--orange)">2-3 WOCHEN</div>
+      <div class="tl-items">
+        Nikki: <strong>längere Zugfahrt</strong><br>
+        <strong>Probe-Packen!</strong> (&lt;12kg?)<br>
+        <strong>Tierarzt-Check</strong> Nikki<br>
+        Offline-Karten laden<br>
+        Unterkünfte buchen
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot" style="background:var(--red)">4</div>
+      <div class="tl-label" style="color:var(--red)">1 WOCHE</div>
+      <div class="tl-items">
+        Rucksack <strong>final packen</strong><br>
+        HelloBello abwiegen<br>
+        Powerbank voll laden<br>
+        <strong>Wetter-Check</strong><br>
+        <strong style="color:var(--gold)">LOS GEHT'S!</strong>
+      </div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="alert warn">
+      <h3 style="color:var(--orange);font-size:0.85rem;margin-bottom:6px">LEINENPFLICHT & NATURSCHUTZ</h3>
+      <div style="font-size:0.82rem;color:var(--soft);line-height:1.6">
+        Brut- und Setzzeit 1.3.-15.7. = Nikki IMMER angeleint!<br>
+        Naturschutzgebiete: Wege nicht verlassen! Wild-Camping VERBOTEN.<br>
+        Hundehaftpflicht in Thüringen PFLICHT. Kotbeutel IMMER.
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">EINKAUFS-STRATEGIE</h3>
+      <ul>
+        <li><strong>Tag 1:</strong> Haupt-Einkauf (Nudeln, Ramen, Trail-Mix, Nikki-Futter)</li>
+        <li><strong>Tag 4-5:</strong> Zwischen-Einkauf (Couscous, Salami, Käse, Nikki Packstation!)</li>
+        <li><strong>Tag 6-7:</strong> Vor-Rhön (Nachschub, Gaskartuschen prüfen)</li>
+        <li>HelloBello per DHL Packstation vorschicken = 1.2 kg weniger tragen!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 21: VARIABEL -->
+<div class="slide content-hero" data-n="21">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="label" style="color:var(--gold)">FLEXIBEL BLEIBEN</div>
+  <h2>Alternativen & Plan B</h2>
+  <div style="display:flex;gap:12px;margin:4px 0 16px">
+    <span class="stat-pill" style="border-color:rgba(240,192,64,0.3)"><span class="sp-num" style="color:var(--gold)">4</span> Route-Varianten</span>
+    <span class="stat-pill" style="border-color:rgba(240,192,64,0.3)"><span class="sp-num" style="color:var(--orange)">3</span> Budget-Szenarien</span>
+    <span class="stat-pill" style="border-color:rgba(240,192,64,0.3);color:var(--green);font-weight:600">Grundweg bleibt!</span>
+  </div>
+  <div class="grid g3">
+    <div class="card c-blue">
+      <h3 style="color:var(--blue)">ROUTE-VARIANTEN</h3>
+      <ul>
+        <li><strong style="color:var(--blue)">Tag 1:</strong> Direkt zum Harz (kein Spreewald)</li>
+        <li><strong style="color:var(--blue)">Tag 3:</strong> Saale-Paddeln statt Weinberg</li>
+        <li><strong style="color:var(--blue)">Tag 5:</strong> Brocken-Umgebung statt Ilsetal</li>
+        <li><strong style="color:var(--blue)">Tag 10:</strong> Extra-Tag Rhön (11 Tage)</li>
+      </ul>
+    </div>
+    <div class="card c-orange">
+      <h3 style="color:var(--orange)">UNTERKUNFT-SZENARIEN</h3>
+      <ul>
+        <li><strong style="color:var(--green)">Budget:</strong> Mehr Camping (~390 EUR)</li>
+        <li><strong style="color:var(--gold)">Komfort:</strong> Mehr Pension (~770 EUR)</li>
+        <li><strong style="color:var(--orange)">Spontan:</strong> Je nach Wetter entscheiden!</li>
+        <li>Jugendherbergen als Mittelweg</li>
+      </ul>
+    </div>
+    <div class="card c-red">
+      <h3 style="color:var(--red)">SCHLECHTWETTER-PLAN</h3>
+      <ul>
+        <li><strong>Plan B pro Tag:</strong> Bus zum nächsten Ort</li>
+        <li>Rennsteig bei Regen = NOCH mystischer!</li>
+        <li>Bodetal bei Regen: dramatischer!</li>
+        <li><strong style="color:var(--red)">Gewitter? RAUS vom Kammweg!</strong></li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card c-purple">
+      <h3 style="color:var(--purple)">ADD-ONS (OPTIONAL)</h3>
+      <ul>
+        <li><strong style="color:var(--purple)">Wanderstöcke</strong> &mdash; 30-60 EUR, entlastet Knie bergab</li>
+        <li><strong style="color:var(--purple)">Hunde-Schwimmweste</strong> &mdash; 20-30 EUR, Spreewald-Kanu</li>
+        <li><strong style="color:var(--purple)">Solar-Powerbank</strong> &mdash; 40-60 EUR, Sven interessiert</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">BONUS-AKTIVITÄTEN</h3>
+      <ul>
+        <li><strong style="color:var(--green)">Wörlitz (Tag 3):</strong> UNESCO Park, nur 1h Umweg</li>
+        <li><strong style="color:var(--green)">Teufelsmauer (Tag 4):</strong> Bizarre Felsformation</li>
+        <li><strong style="color:var(--green)">Kyffhäuser (Tag 6):</strong> Denkmal versteckt im Wald</li>
+        <li><strong style="color:var(--green)">Melibokus (Heimat):</strong> Mandelblüte im April!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOLIE 22: FINALE -->
+<div class="slide" data-n="22">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?auto=format&fit=crop&w=1920&q=80')"></div>
+  <div class="end-content">
+    <div class="label" style="margin-bottom:20px">10 TAGE &bull; 267 KM &bull; EIN ABENTEUER</div>
+    <h1 style="background:linear-gradient(135deg,#fff,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:28px">
+      Euer Heimweg<br>beginnt hier.
+    </h1>
+    <div style="height:2px;width:80px;background:var(--green);margin:0 auto 28px"></div>
+    <p>Von Potsdam nach Hause &mdash; durch Schluchten, Nebelwälder,</p>
+    <p>über Kammwege, durch kristallklare Täler, unter dem Sternenhimmel.</p>
+    <div style="height:24px"></div>
+    <p style="color:var(--gold);font-weight:600;font-size:1.3rem;font-family:'Playfair Display',serif">Deine erste Mehrtageswanderung.</p>
+    <p style="color:var(--gold);font-weight:600;font-size:1.3rem;font-family:'Playfair Display',serif">Nikkis erstes großes Abenteuer.</p>
+    <div style="height:16px"></div>
+    <p style="color:var(--green);font-weight:700;font-size:1.6rem;font-family:'Playfair Display',serif">April 2026.</p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button onclick="go(-1)">&#8592;</button>
+  <span class="counter" id="counter">1 / 24</span>
+  <button onclick="go(1)">&#8594;</button>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),total=slides.length;
+let cur=0,mapInited=false,detailMapInited=false;
+function show(n){
+  slides.forEach((s,i)=>{
+    s.classList.remove('active','prev');
+    if(i===n)s.classList.add('active');
+    else if(i<n)s.classList.add('prev');
+  });
+  document.getElementById('counter').textContent=(n+1)+' / '+total;
+  document.getElementById('progress').style.width=((n+1)/total*100)+'%';
+  cur=n;
+  // Init maps lazily when their slides become active
+  if(!mapInited&&slides[n].querySelector('#tourmap'))initTourMap();
+  if(!detailMapInited&&slides[n].querySelector('#detailmap'))initDetailMap();
+}
+function go(d){const n=cur+d;if(n>=0&&n<total)show(n)}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1)}
+  if(e.key==='ArrowLeft')go(-1);
+  if(e.key==='Home')show(0);
+  if(e.key==='End')show(total-1);
+});
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?go(1):go(-1)}});
+
+// Tour map
+function initTourMap(){
+  mapInited=true;
+  const map=L.map('tourmap',{zoomControl:false,attributionControl:false}).setView([51.0,11.0],7);
+  L.control.zoom({position:'bottomleft'}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    maxZoom:18,attribution:'CartoDB'
+  }).addTo(map);
+  const stops=[
+    {name:'Potsdam',lat:52.3906,lng:13.0645,color:'#f0c040',type:'Start',desc:'Beim Kumpel, 10.-19. April',r:10},
+    {name:'Lübbenau',lat:51.8659,lng:13.7669,color:'#4ec9b0',type:'Tag 1-2',desc:'Spreewald: Kanu mit Nikki!',r:8},
+    {name:'Naumburg',lat:51.1500,lng:11.8100,color:'#60a5fa',type:'Tag 3',desc:'Saale-Unstrut Weinberge',r:7},
+    {name:'Thale',lat:51.7500,lng:11.0330,color:'#4ec9b0',type:'Tag 4',desc:'Bodetal: 280m Schlucht!',r:8},
+    {name:'Ilsenburg',lat:51.8659,lng:10.6826,color:'#f97316',type:'Tag 5',desc:'Ruhetag: Ilsetal',r:7},
+    {name:'Stolberg',lat:51.5789,lng:10.9508,color:'#60a5fa',type:'Tag 6',desc:'Südharz: Gipskarst',r:7},
+    {name:'Schmiedefeld',lat:50.6300,lng:10.7500,color:'#4ec9b0',type:'Tag 7',desc:'Rennsteig: NEBELWALD!',r:9},
+    {name:'Sitzendorf',lat:50.6336,lng:11.1642,color:'#60a5fa',type:'Tag 8',desc:'Schwarzatal: Geheimtipp',r:7},
+    {name:'Gersfeld',lat:50.4500,lng:9.9167,color:'#4ec9b0',type:'Tag 9',desc:'Rhön: Sternenpark',r:8},
+    {name:'Schotten',lat:50.5000,lng:9.1200,color:'#60a5fa',type:'Tag 10',desc:'Vogelsberg: Heimkehr',r:7},
+    {name:'Weiterstadt',lat:49.9069,lng:8.5950,color:'#f0c040',type:'ZUHAUSE',desc:'Angekommen!',r:10},
+  ];
+  // Route line
+  const coords=stops.map(s=>[s.lat,s.lng]);
+  L.polyline(coords,{color:'#4ec9b0',weight:3,opacity:0.6,dashArray:'8 6'}).addTo(map);
+  // Markers
+  stops.forEach(s=>{
+    L.circleMarker([s.lat,s.lng],{
+      radius:s.r,fillColor:s.color,color:'#fff',weight:2,opacity:0.9,fillOpacity:0.85
+    }).addTo(map).bindPopup(
+      `<div style="font-family:Inter,sans-serif;min-width:160px">
+        <div style="font-size:11px;font-weight:700;color:${s.color};text-transform:uppercase;letter-spacing:1px">${s.type}</div>
+        <div style="font-size:15px;font-weight:800;margin:4px 0">${s.name}</div>
+        <div style="font-size:12px;color:#666">${s.desc}</div>
+      </div>`
+    );
+  });
+  // Fit bounds
+  map.fitBounds(coords,{padding:[80,80]});
+  setTimeout(()=>map.invalidateSize(),300);
+}
+
+// Detail map with all POIs, routes, accommodations
+function initDetailMap(){
+  detailMapInited=true;
+  const tileUrl='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  const dm=L.map('detailmap',{zoomControl:false,attributionControl:false}).setView([51.0,11.0],7);
+  L.control.zoom({position:'bottomleft'}).addTo(dm);
+  L.tileLayer(tileUrl,{maxZoom:18}).addTo(dm);
+
+  function ic(cls,txt){return L.divIcon({className:'',html:'<div class="mi '+cls+'">'+txt+'</div>',iconSize:[26,26],iconAnchor:[13,13]})}
+
+  // === TRANSPORT ROUTES (Zug/Bus = blue dashed) ===
+  const trainRoutes=[
+    [[52.391,13.065],[52.135,12.566]], // Potsdam → (via Berlin) → Lübbenau (vereinfacht)
+    [[52.391,13.065],[51.866,13.767]],
+    [[51.866,13.767],[51.156,11.809]], // Lübbenau → Naumburg
+    [[51.156,11.809],[51.750,11.033]], // Naumburg → Thale
+    [[51.750,11.033],[51.866,10.683]], // Thale → Ilsenburg
+    [[51.866,10.683],[51.579,10.951]], // Ilsenburg → Stolberg
+    [[51.579,10.951],[50.630,10.750]], // Stolberg → Schmiedefeld
+    [[50.630,10.750],[50.634,11.164]], // Schmiedefeld → Sitzendorf
+    [[50.634,11.164],[50.450,9.917]], // Sitzendorf → Gersfeld
+    [[50.450,9.917],[50.500,9.120]], // Gersfeld → Schotten
+    [[50.500,9.120],[49.907,8.595]], // Schotten → Weiterstadt
+  ];
+  trainRoutes.forEach(r=>L.polyline(r,{color:'#60a5fa',weight:2.5,opacity:0.5,dashArray:'8 6'}).addTo(dm));
+
+  // === WANDERWEGE (green solid) ===
+  const hikingRoutes=[
+    {coords:[[51.87,13.78],[51.86,13.77],[51.85,13.76]],name:'Spreewald Wanderung',dist:'5-8 km'},
+    {coords:[[51.20,11.76],[51.17,11.82],[51.156,11.809]],name:'Unstruttal Weinbergweg',dist:'10 km'},
+    {coords:[[51.745,11.033],[51.740,11.030],[51.735,11.028]],name:'Bodetal-Schlucht',dist:'9 km'},
+    {coords:[[51.866,10.683],[51.855,10.700],[51.845,10.720]],name:'Heinrich-Heine-Weg',dist:'10 km'},
+    {coords:[[51.579,10.951],[51.550,10.970],[51.500,11.000],[51.450,11.050]],name:'Stolberg Gipskarst',dist:'12 km'},
+    {coords:[[50.637,10.770],[50.660,10.790],[50.670,10.800]],name:'Rennsteig-Etappe',dist:'20 km'},
+    {coords:[[50.634,11.164],[50.628,11.168],[50.615,11.159]],name:'Panoramaweg Schwarzatal',dist:'15 km'},
+    {coords:[[50.488,9.926],[50.470,10.070]],name:'Schwarzes Moor Bohlenweg',dist:'5 km'},
+    {coords:[[50.501,9.166],[50.501,9.170],[50.498,9.180]],name:'Vulkanring Vogelsberg',dist:'8 km'},
+  ];
+  hikingRoutes.forEach(h=>{
+    const pl=L.polyline(h.coords,{color:'#22c55e',weight:3.5,opacity:0.7}).addTo(dm);
+    pl.bindPopup('<div style="font-family:Inter,sans-serif"><div style="font-size:11px;color:#22c55e;font-weight:700;text-transform:uppercase">WANDERWEG</div><div style="font-size:14px;font-weight:800;margin:4px 0">'+h.name+'</div><div style="font-size:12px;color:#888">'+h.dist+'</div></div>');
+  });
+
+  // === KANU-ROUTE (teal) ===
+  L.polyline([[51.87,13.78],[51.86,13.79],[51.85,13.77],[51.86,13.76]],
+    {color:'#2dd4bf',weight:3.5,opacity:0.7}).addTo(dm)
+    .bindPopup('<div style="font-family:Inter,sans-serif"><div style="font-size:11px;color:#2dd4bf;font-weight:700">KANU-ROUTE</div><div style="font-size:14px;font-weight:800;margin:4px 0">Spreewald Paddeltour</div><div style="font-size:12px;color:#888">3-4h mit Nikki im Bug!</div></div>');
+
+  // === STÄDTE / HAUPT-STOPS ===
+  const cities=[
+    {name:'Potsdam',lat:52.391,lng:13.065,tag:'START',desc:'Beim Kumpel, 12.-19. April',cls:'mi-start',txt:'P'},
+    {name:'Lübbenau',lat:51.866,lng:13.767,tag:'TAG 1-2',desc:'Spreewald: Kanu + Camping',cls:'mi-city',txt:'L'},
+    {name:'Naumburg',lat:51.156,lng:11.809,tag:'TAG 3',desc:'Saale-Unstrut Weinberge',cls:'mi-city',txt:'N'},
+    {name:'Thale',lat:51.750,lng:11.033,tag:'TAG 4',desc:'Bodetal: 280m Schlucht!',cls:'mi-city',txt:'T'},
+    {name:'Ilsenburg',lat:51.866,lng:10.683,tag:'TAG 5',desc:'Ruhetag: Ilsetal',cls:'mi-city',txt:'I'},
+    {name:'Stolberg',lat:51.579,lng:10.951,tag:'TAG 6',desc:'Südharz: Gipskarst',cls:'mi-city',txt:'St'},
+    {name:'Schmiedefeld',lat:50.630,lng:10.750,tag:'TAG 7',desc:'Rennsteig: NEBELWALD!',cls:'mi-city',txt:'Sc'},
+    {name:'Sitzendorf',lat:50.634,lng:11.164,tag:'TAG 8',desc:'Schwarzatal: Geheimtipp',cls:'mi-city',txt:'Si'},
+    {name:'Gersfeld',lat:50.450,lng:9.917,tag:'TAG 9',desc:'Rhön: Sternenpark',cls:'mi-city',txt:'G'},
+    {name:'Schotten',lat:50.500,lng:9.120,tag:'TAG 10',desc:'Vogelsberg: Heimkehr',cls:'mi-city',txt:'Vo'},
+    {name:'Weiterstadt',lat:49.907,lng:8.595,tag:'ZUHAUSE',desc:'Angekommen!',cls:'mi-start',txt:'W'},
+  ];
+  cities.forEach(c=>{
+    L.marker([c.lat,c.lng],{icon:ic(c.cls,c.txt)}).addTo(dm).bindPopup(
+      '<div style="font-family:Inter,sans-serif;min-width:180px"><div style="font-size:11px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:1px">'+c.tag+'</div><div style="font-size:16px;font-weight:800;margin:4px 0">'+c.name+'</div><div style="font-size:12px;color:#888">'+c.desc+'</div></div>');
+  });
+
+  // === SEHENSWÜRDIGKEITEN / POIs ===
+  const pois=[
+    {name:'Bodetal',lat:51.745,lng:11.033,desc:'280m tiefe Granitschlucht',icon:'!'},
+    {name:'Rosstrappe',lat:51.746,lng:11.037,desc:'Dramatischer Felsvorsprung',icon:'!'},
+    {name:'Ilsetal',lat:51.845,lng:10.720,desc:'Romantischer Waldbach',icon:'!'},
+    {name:'Eckertalsperre',lat:51.820,lng:10.580,desc:'Bergsee mit Brocken-Panorama',icon:'!'},
+    {name:'Josephskreuz',lat:51.331,lng:11.241,desc:'Größtes Eisenkreuz, 360° Aussicht',icon:'!'},
+    {name:'Schneekopf',lat:50.660,lng:10.790,desc:'978m, 100km Fernsicht',icon:'!'},
+    {name:'Vessertal UNESCO',lat:50.640,lng:10.780,desc:'Urwald mit alten Buchen',icon:'!'},
+    {name:'Schwarzatal',lat:50.620,lng:11.165,desc:'53km Kerbtal, kaum Touristen',icon:'!'},
+    {name:'Schwarzes Moor',lat:50.470,lng:10.070,desc:'UNESCO Hochmoor, Bohlenweg',icon:'!'},
+    {name:'Wasserkuppe',lat:50.498,lng:9.937,desc:'950m, höchster Berg Hessens',icon:'!'},
+    {name:'Hoherodskopf',lat:50.501,lng:9.166,desc:'764m, Niddaquelle',icon:'!'},
+    {name:'Teufelsmauer',lat:51.686,lng:11.381,desc:'Bizarre Sandsteinfelsen (Bonus)',icon:'!'},
+    {name:'Kyffhäuser',lat:51.359,lng:11.099,desc:'Denkmal im Wald (Bonus)',icon:'!'},
+  ];
+  pois.forEach(p=>{
+    L.marker([p.lat,p.lng],{icon:ic('mi-poi',p.icon)}).addTo(dm).bindPopup(
+      '<div style="font-family:Inter,sans-serif;min-width:160px"><div style="font-size:11px;font-weight:700;color:#f97316;text-transform:uppercase">SEHENSWÜRDIGKEIT</div><div style="font-size:14px;font-weight:800;margin:4px 0">'+p.name+'</div><div style="font-size:12px;color:#888">'+p.desc+'</div></div>');
+  });
+
+  // === NATUR-HIGHLIGHTS ===
+  const nature=[
+    {name:'Spreewald Fließe',lat:51.860,lng:13.780,desc:'UNESCO Biosphärenreservat'},
+    {name:'Weinbergterrassen',lat:51.200,lng:11.760,desc:'Saale-Unstrut, Trockenmauern'},
+    {name:'Rennsteig',lat:50.660,lng:10.795,desc:'Legendärer 169km Kammweg'},
+    {name:'Sternenpark Rhön',lat:50.488,lng:9.926,desc:'Milchstraße nachts sichtbar!'},
+    {name:'Beerberg Hochmoor',lat:50.665,lng:10.800,desc:'Mystisches Moor am Rennsteig'},
+  ];
+  nature.forEach(n=>{
+    L.marker([n.lat,n.lng],{icon:ic('mi-nature','N')}).addTo(dm).bindPopup(
+      '<div style="font-family:Inter,sans-serif;min-width:160px"><div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase">NATUR</div><div style="font-size:14px;font-weight:800;margin:4px 0">'+n.name+'</div><div style="font-size:12px;color:#888">'+n.desc+'</div></div>');
+  });
+
+  // === UNTERKÜNFTE ===
+  const accoms=[
+    {name:'Natur-Camping Am See',lat:51.870,lng:13.785,type:'Camping',price:'27€',dog:'Hundestrand!'},
+    {name:'Pension Freyburg',lat:51.159,lng:11.815,type:'Pension',price:'55€',dog:'Hund willkommen'},
+    {name:'Hotel Bodeblick',lat:51.745,lng:11.035,type:'Hotel',price:'100€',dog:'Überall willkommen'},
+    {name:'FeWo Ilsenburg',lat:51.860,lng:10.690,type:'FeWo',price:'60-80€',dog:'Ja'},
+    {name:'Blockhaus Fuchsbau',lat:51.580,lng:10.945,type:'Blockhaus',price:'49€',dog:'€5, eingezäunt'},
+    {name:'Trekkingplatz Rennsteig',lat:50.635,lng:10.755,type:'Trekking',price:'5-10€',dog:'Anmeldung!'},
+    {name:'Pension Bergterrasse',lat:50.630,lng:11.170,type:'Pension',price:'45€',dog:'€5-6, Bergblick'},
+    {name:'Trekkingplatz Rhön',lat:50.475,lng:10.065,type:'Trekking',price:'15€',dog:'Sternenliegen!'},
+    {name:'TrollLand Schotten',lat:50.505,lng:9.125,type:'Waldhaus',price:'75€',dog:'1300m² eingezäunt'},
+  ];
+  accoms.forEach(a=>{
+    const isCamp=a.type==='Camping'||a.type==='Trekking';
+    L.marker([a.lat,a.lng],{icon:ic('mi-accom',isCamp?'C':'U')}).addTo(dm).bindPopup(
+      '<div style="font-family:Inter,sans-serif;min-width:180px"><div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase">'+a.type+'</div><div style="font-size:14px;font-weight:800;margin:4px 0">'+a.name+'</div><div style="font-size:12px;color:#888">'+a.price+' / Nacht</div><div style="font-size:11px;color:#a78bfa;margin-top:2px">Hund: '+a.dog+'</div></div>');
+  });
+
+  // Fit bounds
+  const allCoords=cities.map(c=>[c.lat,c.lng]);
+  dm.fitBounds(allCoords,{padding:[60,60]});
+  setTimeout(()=>dm.invalidateSize(),300);
+}
+
+// Preload
+const imgs=[
+  'photo-1502252430442-aac78f397426','photo-1612774412771-005ed8e861d2',
+  'photo-1621519994490-b87b9401599e','photo-1759062012196-ab43aef31a6f',
+  'photo-1479030160180-b1860951d696','photo-1741328107513-77a81891a25c',
+  'photo-1690310457081-71c3fb276e10','photo-1735508299591-8194ac4e3df9',
+  'photo-1728932828860-f55c3891eb17','photo-1765825365130-52e276bca060',
+  'photo-1755889825647-bd72449d29e4','photo-1506748686214-e9df14d4d9d0',
+  'photo-1535958636474-b021ee887b13',
+  'photo-1504674900247-0877df9cc836','photo-1587300003388-59208cc962cb',
+  'photo-1548199973-03cce0bbc87b','photo-1502920917128-1aa500764cbd',
+  'photo-1551632811-561732d1e306','photo-1464822759023-fed622ff2c3b',
+  'photo-1501555088652-021faa106b9b'
+];
+let loaded=0;
+const bar=document.getElementById('loadbar');
+const loader=document.getElementById('loader');
+imgs.forEach(id=>{
+  const img=new Image();
+  img.onload=img.onerror=()=>{
+    loaded++;
+    bar.style.width=(loaded/imgs.length*100)+'%';
+    if(loaded>=imgs.length)setTimeout(()=>loader.classList.add('hidden'),400);
+  };
+  img.src='https://images.unsplash.com/'+id+'?auto=format&fit=crop&w=1920&q=80';
+});
+setTimeout(()=>loader.classList.add('hidden'),5000);
+show(0);
+</script>
+</body>
+</html>
