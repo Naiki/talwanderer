@@ -64,7 +64,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 
 .card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-radius:16px;padding:20px;border:1px solid var(--glassBorder);
-  animation:fadeUp .6s ease both}
+  animation:fadeUp .6s ease both;flex:1}
 .card h3{margin-bottom:10px}
 .card ul{list-style:none;padding:0}
 .card li{padding:4px 0;font-size:0.85rem;color:var(--soft);line-height:1.5}
@@ -77,7 +77,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 .card.c-purple h3{color:var(--purple)}.card.c-purple li::before{background:var(--purple)}
 .card.c-forest h3{color:var(--forest)}.card.c-forest li::before{background:var(--forest)}
 
-.grid{display:grid;gap:16px}
+.grid{display:grid;gap:14px}
 .g2{grid-template-columns:1fr 1fr}
 .g3{grid-template-columns:1fr 1fr 1fr}
 .g4{grid-template-columns:repeat(4,1fr)}
@@ -106,7 +106,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 .day-hero .day-sub{font-size:1rem;color:var(--soft);margin-top:8px;font-weight:300}
 .day-hero .day-stats{display:flex;gap:16px;margin-top:12px}
 .day-hero .day-stats span{background:rgba(255,255,255,0.1);padding:5px 14px;border-radius:8px;font-size:0.78rem;color:var(--soft);font-weight:500}
-.day-cards{padding:0 50px 90px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;position:relative;z-index:1}
+.day-cards{padding:0 40px 80px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;position:relative;z-index:1}
 .day-cards .card{padding:16px 18px}
 .day-cards .card li{font-size:0.82rem;padding:3px 0}
 
@@ -120,7 +120,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 .alert.ok{border-left:3px solid var(--green)}
 .alert.danger{border-left:3px solid var(--red)}
 
-.content-slide{padding:40px 50px 90px;background:var(--bg)}
+.content-slide{padding:30px 40px 80px;background:var(--bg)}
 
 .chain{display:flex;align-items:stretch;gap:0;margin:20px 0;flex-wrap:wrap;justify-content:center}
 .chain .stop{background:var(--glass);backdrop-filter:blur(12px);border-radius:12px;
@@ -262,7 +262,9 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 .weight-row .wr-kg{width:40px;text-align:right;font-weight:600;font-size:0.75rem}
 
 /* CONTENT-HERO: content-slide with subtle bg image */
-.content-hero{padding:40px 50px 90px;background:var(--bg)}
+.content-hero{padding:30px 40px 80px;background:var(--bg)}
+.content-slide,.content-hero{display:flex;flex-direction:column}
+.content-slide .grid,.content-hero .grid{flex:1}
 .content-hero .hero-bg::after{
   background:linear-gradient(to bottom,rgba(10,15,26,0.4) 0%,rgba(10,15,26,0.75) 15%,rgba(10,15,26,0.92) 35%,rgba(10,15,26,0.98) 100%)}
 .content-hero>.hero-bg~*{position:relative;z-index:1}
@@ -320,7 +322,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <!-- ERSETZE MIT ECHTEM NIKKI-FOTO: Nikki schaut in Kamera -->
     <div style="margin:16px 0">
       <div class="nikki-badge">
-        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=100&q=80" alt="Nikki">
+        <img src="img/nikki1.jpg" alt="Nikki">
         <span class="nb-text">mit Nikki, dem Mini Goldendoodle</span>
       </div>
     </div>
@@ -349,6 +351,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   </div>
   <div class="day-cards">
     <div class="card c-blue">
+      <img class="card-img" src="https://images.unsplash.com/photo-1515165562839-978bbcf18277?auto=format&fit=crop&w=600&q=70" alt="Zugfahrt" style="height:80px">
       <h3 style="color:var(--blue)">REISE-ROUTE</h3>
       <div class="chain" style="margin:10px 0">
         <div class="stop" style="border-top:3px solid var(--green)"><div class="tag" style="color:var(--green)">START</div><div class="name">Weiterstadt</div><div class="info">Bus WE3, 20 Min</div></div><div class="arr">&rarr;</div>
@@ -365,7 +368,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     </div>
     <div class="card c-gold">
       <!-- ERSETZE MIT ECHTEM NIKKI-FOTO: Nikki mit Weste/Geschirr -->
-      <img class="card-img" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=70" alt="Nikki im Zug" style="height:100px">
+      <img class="card-img" src="img/nikki3.jpg" alt="Nikki im Zug" style="height:100px">
       <h3 style="color:var(--gold)">NIKKI IM FLIXTRAIN</h3>
       <ul>
         <li><strong style="color:var(--red)">PFLICHT: Maulkorb + Leine + Decke!</strong></li>
@@ -405,6 +408,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   </div>
   <div class="day-cards">
     <div class="card c-purple">
+      <img class="card-img" src="https://images.unsplash.com/photo-1548092372-0d1bd40894a3?auto=format&fit=crop&w=600&q=70" alt="Potsdam Sanssouci" style="height:100px">
       <h3 style="color:var(--purple)">POTSDAM ENTDECKEN</h3>
       <ul>
         <li><strong style="color:var(--gold)">Sanssouci Park:</strong> Hundefreundlich (angeleint!)</li>
@@ -477,13 +481,13 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
       <div class="label" style="margin-bottom:10px;color:var(--gold)">NIKKI IN BILDERN</div>
       <div class="nikki-gallery">
         <!-- ERSETZE: Nikki auf Herbstblaettern -->
-        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=400&q=80" alt="Nikki auf Herbstblaettern" title="Abenteurerin">
+        <img class="nikki-thumb" src="img/nikki1.jpg" alt="Nikki auf Herbstblaettern" title="Abenteurerin">
         <!-- ERSETZE: Nikki erkundet einen Weg -->
-        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=400&q=80" alt="Nikki erkundet Weg" title="Entdeckerin">
+        <img class="nikki-thumb" src="img/nikki2.jpg" alt="Nikki erkundet Weg" title="Entdeckerin">
         <!-- ERSETZE: Nikki mit Weste zuhause -->
-        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1583337130417-13219ce08018?auto=format&fit=crop&w=400&q=80" alt="Nikki mit Weste" title="Reisebereit">
+        <img class="nikki-thumb" src="img/nikki3.jpg" alt="Nikki mit Weste" title="Reisebereit">
         <!-- ERSETZE: Nikki liegt mit Spielzeug -->
-        <img class="nikki-thumb" src="https://images.unsplash.com/photo-1591946614720-90a587da4a36?auto=format&fit=crop&w=400&q=80" alt="Nikki mit Spielzeug" title="Kuschelmodus">
+        <img class="nikki-thumb" src="img/nikki4.jpg" alt="Nikki mit Spielzeug" title="Kuschelmodus">
       </div>
     </div>
   </div>
@@ -890,7 +894,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
       <h3 style="color:var(--red)">DER SHOT DER REISE</h3>
       <!-- ERSETZE: Nikki von hinten auf einem Waldweg -->
       <div class="nikki-kenburns" style="height:90px;margin-bottom:10px">
-        <img src="https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=600&q=70" alt="Nikki im Nebel">
+        <img src="img/nikki2.jpg" alt="Nikki im Nebel">
       </div>
       <ul>
         <li>Nikki auf einem Fels. Morgennebel. Lichtstrahl trifft sie.</li>
@@ -1050,7 +1054,8 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 </div>
 
 <!-- FOLIE 13: BUDGET -->
-<div class="slide content-slide" data-n="13">
+<div class="slide content-hero" data-n="13">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1920&q=80')"></div>
   <div class="label">BUDGET</div>
   <h2>Was kostet das Abenteuer?</h2>
   <div class="divider"></div>
@@ -1114,7 +1119,8 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
 </div>
 
 <!-- FOLIE 14: PACKLISTE -->
-<div class="slide content-slide" data-n="14">
+<div class="slide content-hero" data-n="14">
+  <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1501554728187-ce583db33af7?auto=format&fit=crop&w=1920&q=80')"></div>
   <div class="label">AUSRÜSTUNG</div>
   <h2>Was muss in den Rucksack?</h2>
   <div class="divider"></div>
@@ -1217,6 +1223,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <h2 style="font-size:2rem;margin-bottom:16px">Bier & Wein entlang der Route</h2>
     <div class="grid g3" style="max-width:1100px">
       <div class="card">
+        <img class="card-img" src="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=600&q=70" alt="Craft Bier">
         <h3 style="color:var(--gold)">BIER-HIGHLIGHTS</h3>
         <ul>
           <li><strong style="color:var(--gold)">Köstritzer Schwarzbier</strong> &mdash; DDR-Kultbier, dunkel, malzig. Überall in Thüringen</li>
@@ -1277,7 +1284,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   <div style="margin-top:14px;display:flex;gap:16px;align-items:stretch">
     <!-- NIKKI FEATURED PHOTO: Ersetze mit echtem Nikki-Foto (mit Weste) -->
     <div class="nikki-polaroid p-left" style="flex-shrink:0;width:160px">
-      <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=300&q=80" alt="Nikki bereit" style="height:160px;object-fit:cover;width:148px">
+      <img src="img/nikki1.jpg" alt="Nikki bereit" style="height:160px;object-fit:cover;width:148px">
       <div class="caption">Nikki &mdash; Abenteuer-Doodle</div>
     </div>
     <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -1370,6 +1377,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
   </div>
   <div class="grid g3">
     <div class="card c-forest">
+      <img class="card-img" src="https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=70" alt="Nebel im Wald">
       <h3 style="color:var(--forest)">NEBELWALD-AKTIONSPLAN</h3>
       <ul>
         <li><strong>Abend vorher:</strong> kachelmannwetter.de checken</li>
@@ -1570,7 +1578,7 @@ h3{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5p
     <div style="height:16px"></div>
     <!-- ERSETZE: Nikki schaut in Kamera (Herbstblaetter-Foto) -->
     <div style="margin:8px auto">
-      <img class="nikki-frame lg" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=300&q=80" alt="Nikki">
+      <img class="nikki-frame lg" src="img/nikki1.jpg" alt="Nikki">
     </div>
     <p style="color:var(--green);font-weight:700;font-size:1.6rem;font-family:'Playfair Display',serif;margin-top:8px">April 2026.</p>
   </div>
