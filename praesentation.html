@@ -1951,36 +1951,28 @@ function initDetailMap(){
   setTimeout(()=>dm.invalidateSize(),300);
 }
 
-// Preload
-const imgs=[
-  'photo-1502252430442-aac78f397426','photo-1612774412771-005ed8e861d2',
-  'photo-1474487548417-781cb71495f3','photo-1599922407945-d5e3a8e0c429',
-  'photo-1621519994490-b87b9401599e','photo-1759062012196-ab43aef31a6f',
-  'photo-1479030160180-b1860951d696','photo-1741328107513-77a81891a25c',
-  'photo-1690310457081-71c3fb276e10','photo-1735508299591-8194ac4e3df9',
-  'photo-1728932828860-f55c3891eb17','photo-1765825365130-52e276bca060',
-  'photo-1755889825647-bd72449d29e4','photo-1506748686214-e9df14d4d9d0',
-  'photo-1535958636474-b021ee887b13','photo-1590523741831-ab7e8b8f9c7f',
-  'photo-1504674900247-0877df9cc836','photo-1587300003388-59208cc962cb',
-  'photo-1548199973-03cce0bbc87b','photo-1502920917128-1aa500764cbd',
-  'photo-1551632811-561732d1e306','photo-1464822759023-fed622ff2c3b',
-  'photo-1501555088652-021faa106b9b','photo-1504851149312-7a075b496cc7',
-  'photo-1530281700549-e82e7bf110d6','photo-1537151625747-768eb6cf92b2',
-  'photo-1591946614720-90a587da4a36'
+// Preload only first few hero images, rest loads naturally via CSS background-image
+const preloadImgs=[
+  'photo-1502252430442-aac78f397426', // Hero title
+  'photo-1612774412771-005ed8e861d2', // Team
+  'photo-1474487548417-781cb71495f3', // Hinfahrt
+  'photo-1599922407945-d5e3a8e0c429'  // Potsdam
 ];
 let loaded=0;
 const bar=document.getElementById('loadbar');
 const loader=document.getElementById('loader');
-imgs.forEach(id=>{
+function hideLoader(){loader.classList.add('hidden')}
+preloadImgs.forEach(id=>{
   const img=new Image();
   img.onload=img.onerror=()=>{
     loaded++;
-    bar.style.width=(loaded/imgs.length*100)+'%';
-    if(loaded>=imgs.length)setTimeout(()=>loader.classList.add('hidden'),400);
+    bar.style.width=(loaded/preloadImgs.length*100)+'%';
+    if(loaded>=preloadImgs.length)setTimeout(hideLoader,300);
   };
   img.src='https://images.unsplash.com/'+id+'?auto=format&fit=crop&w=1920&q=80';
 });
-setTimeout(()=>loader.classList.add('hidden'),5000);
+// Safety: hide loader after 3s no matter what
+setTimeout(hideLoader,3000);
 show(0);
 </script>
 </body>
